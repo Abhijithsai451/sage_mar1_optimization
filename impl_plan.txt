@@ -1,0 +1,72 @@
+SAGE-RL: A Multi-Agent Self-Evolving Framework for Enhancing LLM Reasoning via Task-Relative Reinforcement Learning.
+-
+
+### Plan A: Apple Silicon (The "Developer" Plan)
+*Focus: Architecture, Prompt Engineering, and Local Prototyping.*
+
+1.  **Initialize Project:** Create `sage-marl-optimization` in PyCharm with a Python 3.11 environment.
+2.  **Install MLX Stack:** `pip install mlx-lm mlx`.
+3.  **Install Orchestration:** `pip install langgraph`.
+4.  **Download Backbone:** Use `mlx-lm` to download a quantized version of **Qwen2.5-7B-Instruct**.
+5.  **Create Agent Module:** Define a `src/agents/` directory for each role.
+6.  **Prompt 1 (Challenger):** Write a system prompt that enforces "Curriculum Learning" (making tasks harder).
+7.  **Prompt 2 (Planner):** Write a prompt that forces the model to use chain-of-thought (CoT) for strategy.
+8.  **Prompt 3 (Solver):** Define the output format (e.g., using XML tags like `<answer>`).
+9.  **Prompt 4 (Critic):** Define grading rubrics (1-10) for quality and format.
+10. **Implement State Graph:** Use LangGraph to define the flow from Challenger → Planner → Solver → Critic.
+11. **Setup Shared Backbone:** Write a wrapper so one local MLX model serves all four agents.
+12. **Develop Reward Verifiers:** Write Python functions to check math/code answers locally.
+13. **Implement Format Verifier:** Use Regex to ensure the model follows your XML/JSON tags.
+14. **Test "Dry Run":** Run 5 iterations of the SAGE loop on your Mac to ensure agents "talk" correctly.
+15. **Dataset Logger:** Create a local JSONL logger to save successful "traces" (Question + Plan + Answer).
+16. **Local Tokenizer Calibration:** Ensure special tokens for reasoning are properly handled.
+17. **Mock Advantage Calculation:** Write a script to calculate role-based means ($\mu$) on your local logs.
+18. **LoRA Config:** Create a `lora_config.json` file for 4-bit LoRA tuning on your Mac.
+19. **Memory Profiling:** Monitor Unified Memory usage using `mx.metal.get_active_memory()`.
+20. **MLX Inference Optimization:** Enable KV-caching for faster local generation during debugging.
+21. **Visualizer Script:** Write a small script to print the "SAGE Evolution" (e.g., Task 1 vs Task 50).
+22. **Agent Diversity Check:** Use a "Diversity Reward" to prevent the Challenger from repeating tasks.
+23. **Safety Filters:** Add a local check to ensure generated tasks aren't harmful.
+24. **Prompt Versioning:** Create a `prompts.yaml` to easily swap agent instructions.
+25. **Export to HPC:** Create a `scripts/export_to_hpc.sh` to sync code and data.
+26. **README Setup:** Document the local setup instructions.
+27. **Mock Evaluation:** Run a local benchmark on 50 GSM8K problems to get a baseline.
+28. **Unified CLI:** Build a single `main.py` to trigger the local loop.
+29. **GitHub Integration:** Commit your structure.
+30. **HPC Credential Prep:** Set up your SSH keys in PyCharm to access the college cluster.
+
+---
+
+### Plan B: CUDA HPC (The "Trainer" Plan)
+*Focus: Scaling, REINFORCE++ Optimization, and Model Evolution.*
+
+1.  **Environment Setup:** Load CUDA and Python modules on the HPC (e.g., `module load cuda/12.1`).
+2.  **Install veRL:** `pip install verl`. This is your engine for **REINFORCE++**.
+3.  **Setup vLLM:** Ensure `vllm` is installed for high-speed batch generation.
+4.  **Allocate Resources:** Request a Slurm allocation (e.g., `salloc --gres=gpu:4`).
+5.  **Initialize Ray:** Start a local Ray cluster on the HPC node for multi-agent parallelization.
+6.  **Upload Local Data:** Transfer the "Seed Tasks" you prepared on your Mac.
+7.  **Shared Backbone Setup:** Configure veRL to map all 4 roles to one physical model weights.
+8.  **Configure REINFORCE++:** Set up the policy gradient loss function in `config.yaml`.
+9.  **Implement Per-Role Normalization:** Use veRL's `reward_manager` to split $\mu$ and $\sigma$ by role.
+10. **KL-Divergence Setup:** Link the "Reference Model" to prevent the model from drifting too far.
+11. **Batch Size Tuning:** Optimize the rollout batch size (usually 512–1024 on an A100).
+12. **Verifiable Reward Sandbox:** Set up a secure Docker or process-based sandbox for code tasks.
+13. **Critic Calibration:** Fine-tune the Critic role first so it provides stable 1-10 scores.
+14. **Warm-up Phase:** Run 100 steps of standard SFT (Supervised Fine-Tuning) to stabilize weights.
+15. **Policy Update Interval:** Set how often the backbone updates (e.g., every 8 rollouts).
+16. **Task-Relative Advantage Estimate:** Verify Equation 1 (the per-role math) is calculating correctly.
+17. **FP16/BF16 Setup:** Enable Mixed Precision to speed up training.
+18. **FSDP Integration:** Use Fully Sharded Data Parallel if using a model > 7B.
+19. **Tensorboard Monitoring:** Track reward curves for all 4 agents separately.
+20. **Checkpointing:** Auto-save model weights every 50 global steps.
+21. **Challenger-Solver Balance:** Monitor the "Difficulty Score" to ensure the Solver isn't winning too easily.
+22. **Entropy Bonus:** Add an entropy coefficient to keep the Challenger "creative."
+23. **Evaluation Loop:** Run an automated "Middle-of-Training" test on AIME or HumanEval.
+24. **Gradient Clipping:** Prevent the "Exploding Gradient" problem common in RL.
+25. **Multi-Node Sync:** If using 2+ nodes, ensure Ray communication is optimized (NCCL).
+26. **Optimizer Selection:** Use AdamW with a specific learning rate for RL (usually lower, like 1e-6).
+27. **Prompt Injection Guard:** Ensure the RL doesn't "cheat" by outputting reward-triggering tokens.
+28. **Final Weight Merging:** Merge the LoRA adapters into the base model after training.
+29. **Benchmarking:** Compare SAGE-trained model vs. Base model on the HPC.
+30. **Download Results:** Sync the final model back to your Mac for your portfolio demo.
