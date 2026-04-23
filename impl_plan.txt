@@ -4,10 +4,10 @@ SAGE-RL: A Multi-Agent Self-Evolving Framework for Enhancing LLM Reasoning via T
 ### Plan A: Apple Silicon (The "Developer" Plan)
 *Focus: Architecture, Prompt Engineering, and Local Prototyping.*
 
-1.  **Initialize Project:** Create `sage-marl-optimization` in PyCharm with a Python 3.11 environment.
-2.  **Install MLX Stack:** `pip install mlx-lm mlx`.
-3.  **Install Orchestration:** `pip install langgraph`.
-4.  **Download Backbone:** Use `mlx-lm` to download a quantized version of **Qwen2.5-7B-Instruct**.
+1.  **Initialize Project:** Create `sage-marl-optimization` in PyCharm with a Python 3.11 environment. DONE
+2.  **Install MLX Stack:** `pip install mlx-lm mlx`. DONE
+3.  **Install Orchestration:** `pip install langgraph`.DONE
+4.  **Download Backbone:** Use `mlx-lm` to download a quantized version of **Qwen2.5-7B-Instruct**.DONE
 5.  **Create Agent Module:** Define a `src/agents/` directory for each role.
 6.  **Prompt 1 (Challenger):** Write a system prompt that enforces "Curriculum Learning" (making tasks harder).
 7.  **Prompt 2 (Planner):** Write a prompt that forces the model to use chain-of-thought (CoT) for strategy.
