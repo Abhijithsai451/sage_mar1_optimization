@@ -11,5 +11,4 @@ def get_data(dir):
                   name = "main",
                   cache_dir = dir
                   )
-    logger.info(f"Dataset Loaded Successfully")
     return dataset
