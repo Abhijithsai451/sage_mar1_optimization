@@ -1,13 +1,9 @@
-import os
+from typing import TypedDict, List
 
-from dotenv import load_dotenv
-from langchain.agents import create_agent
-from mlx_lm import load, generate
-
-load_dotenv()
-model_dir = os.getenv("MODEL_DIR")
-
-designer_prompt ="""
+from langchain_core.messages import SystemMessage
+from agents.agent_state import SAGEAgentState
+from config.model_config import llm
+challenger_prompt ="""
 Role: Task Designer Agent
 Description:
 You are a task generation specialist. Your goal is to create a single, high-quality evaluation task that challenges complex reasoning abilities.
@@ -27,13 +23,16 @@ Respond using:
 [Your generated task here]
 </question>
 """
+class ChallengerState(TypedDict):
+    messages: List[str]
+    task: List[str]
 
-def run_challenger():
-    #model, tokenizer = load(model_dir, tokenizer_config={"eos_token": "<|im_end|>"})
-    model, tokenizer = load(model_dir)
-    text = tokenizer.apply_chat_template(
-        designer_prompt, tokenize=False, add_generation_prompt=True
-    )
+def challenger_agent(state: SAGEAgentState)-> SAGEAgentState:
+    """
+    Challenger Agent will generate the list of questions as per the {system prompt} and sends it to the critic agent.
+    """
+    system_prompt = SystemMessage(contnt=challenger_prompt)
 
-    response = generate(model, tokenizer, prompt=text, verbose=True, top_p=0.8, temp=0.7, repetition_penalty=1.05, max_tokens=512)
-    return response
+
+    pass
+
