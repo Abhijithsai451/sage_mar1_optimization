@@ -3,7 +3,7 @@ from typing import TypedDict, List
 from langchain_core.messages import SystemMessage
 from agents.agent_state import SAGEAgentState
 from config.model_config import llm
-challenger_prompt ="""
+challenger_policy ="""
 Role: Task Designer Agent
 Description:
 You are a task generation specialist. Your goal is to create a single, high-quality evaluation task that challenges complex reasoning abilities.

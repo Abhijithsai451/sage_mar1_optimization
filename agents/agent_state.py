@@ -4,12 +4,20 @@ from langchain_core.messages import BaseMessage
 
 
 class SAGEAgentState:
-    num_tasks: int
-    questions: list[str]
-    answers: list[str]
-    planner_steps: List[str]
-    critic_score: float
-    history: List[str]
+
+    #Challenger
+    challenger_reward: int
+    threshold: int = 0.7
+    reward_diff: int
+
+    #Planner
+    reg_beta: int = 0.3
+    weight_coeff: int = 0.5
+    score_planner: int
+    reward_planner : int
+
+
+
 
 
 
