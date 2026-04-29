@@ -4,29 +4,32 @@ from langchain_core.messages import BaseMessage
 
 
 class SAGEAgentState(TypedDict):
-
+    messages: List[BaseMessage]
     #Challenger
-    reward_challenger: int
-    alpha: int
-    reward_diff: int
+    reward_challenger: float
+    alpha: float
+    reward_diff: float
 
     #Planner
-    beta: int
-    lambda_plan: int
-    reward_planner : int
+    beta: float
+    lambda_plan: float
+    reward_planner : float
 
     #Solver
-    reward_solver: int
-    lambda_format: int
-    w_p : int
-    w_c : int
-    w_f : int
+    reward_solver: float
+    lambda_format: float
+    w_p : float
+    w_c : float
+    w_f : float
 
     #Critic
-    reward_critic: int
-    reward_format: int
-    score_quality: int
-    score_planner : int
+    reward_critic: float
+    reward_format: float
+    score_quality: float
+    score_planner : float
+    score_ground_truth : float
+
+    status: str
 
 
 

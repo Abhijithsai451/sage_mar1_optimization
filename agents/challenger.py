@@ -27,7 +27,7 @@ Respond using:
 
 def challenger_agent(state: SAGEAgentState)-> SAGEAgentState:
 
-    #response = get_backbone().invoke(challenger_policy)
+
     state['alpha'] = 0.7
 
     if state['score_quality']>=state['alpha']:
@@ -35,4 +35,6 @@ def challenger_agent(state: SAGEAgentState)-> SAGEAgentState:
     else:
         state['reward_challenger'] = (state['score_quality'] + state['reward_format'])/ 2
 
+    response = get_backbone().invoke(prompt = state['input'], system_prompt = challenger_policy)
+    state['messages'] = response.content
     return state
