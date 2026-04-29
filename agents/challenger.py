@@ -2,7 +2,8 @@ from typing import TypedDict, List
 
 from langchain_core.messages import SystemMessage
 from agents.agent_state import SAGEAgentState
-from config.model_config import llm
+from config.model_config import get_backbone
+
 challenger_policy ="""
 Role: Task Designer Agent
 Description:
@@ -23,16 +24,15 @@ Respond using:
 [Your generated task here]
 </question>
 """
-class ChallengerState(TypedDict):
-    messages: List[str]
-    task: List[str]
 
 def challenger_agent(state: SAGEAgentState)-> SAGEAgentState:
-    """
-    Challenger Agent will generate the list of questions as per the {system prompt} and sends it to the critic agent.
-    """
-    system_prompt = SystemMessage(contnt=challenger_prompt)
 
+    #response = get_backbone().invoke(challenger_policy)
+    state['alpha'] = 0.7
 
-    pass
+    if state['score_quality']>=state['alpha']:
+        state['reward_challenger'] = (state['score_quality'] + state['reward_diff'] + state['reward_format'])/3
+    else:
+        state['reward_challenger'] = (state['score_quality'] + state['reward_format'])/ 2
 
+    return state

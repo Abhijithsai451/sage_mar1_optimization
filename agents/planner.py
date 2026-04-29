@@ -1,3 +1,5 @@
+from agents.agent_state import SAGEAgentState
+
 planner_prompt="""
 Role: Planner Agent
 Description:
@@ -9,3 +11,11 @@ Respond using:
 2. ...
 </plan>
 """
+
+def planner_agent(state: SAGEAgentState)-> SAGEAgentState:
+    state['beta'] = 0.3
+    state['lambda_plan']= 0.5
+    #state['score_plan'] =
+    state['reward_plam'] = (state['lambda_plan']*state['score_plan'])+(state['lambda_format']* state['reward_format'])
+
+    return state
