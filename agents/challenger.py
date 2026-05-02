@@ -1,8 +1,11 @@
-from typing import TypedDict, List
+import os
 
-from langchain_core.messages import SystemMessage
-from agents.agent_state import SAGEAgentState
-from config.model_config import get_backbone
+from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.tools import tool
+from dotenv import load_dotenv
+from states.agent_state import SAGEAgentState
+load_dotenv()
+data_path = os.getenv("DATA_DIR")
 
 challenger_policy ="""
 Role: Task Designer Agent
@@ -25,16 +28,26 @@ Respond using:
 </question>
 """
 
-def challenger_agent(state: SAGEAgentState)-> SAGEAgentState:
+@tool
+def analyze_data_structure()-> str:
+    """
+    This function will read the dataset which contains the questions and answers and analyze the data structure to
+    understand the context.
+    """
 
 
-    state['alpha'] = 0.7
+@tool
+def create_tasks(state: SAGEAgentState,model):
+    """
+    This tool will create the tasks based on the given reference materials.
+    """
+    tasks = model.invoke([
+        SystemMessage(content=challenger_policy),
+        HumanMessage(content= f"Here is the reference question and answer {state['input']}, Create a task similar to this")
+    ])
+    state['tasks'] = tasks
 
-    if state['score_quality']>=state['alpha']:
-        state['reward_challenger'] = (state['score_quality'] + state['reward_diff'] + state['reward_format'])/3
-    else:
-        state['reward_challenger'] = (state['score_quality'] + state['reward_format'])/ 2
-
-    response = get_backbone().invoke(prompt = state['input'], system_prompt = challenger_policy)
-    state['messages'] = response.content
-    return state
+    return {
+        "tasks": tasks,
+        "status": "challenged"
+    }

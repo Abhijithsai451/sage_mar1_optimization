@@ -9,6 +9,6 @@ def get_data(dir):
     logger.info(f"Loading the dataset to the path {dir} ")
     dataset = load_dataset(path ="openai/gsm8k",
                   name = "main",
-                  cache_dir = dir
+                  cache_dir = dir,
                   )
     return dataset

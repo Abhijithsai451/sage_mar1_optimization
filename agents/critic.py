@@ -1,4 +1,7 @@
-from agents.agent_state import SAGEAgentState
+from langchain_core.messages import tool
+
+from states.agent_state import SAGEAgentState
+from states.critic_state import CriticState
 from config.model_config import get_backbone
 
 evaluate_question_prompt="""
@@ -82,7 +85,17 @@ Important:
 Output only one tag like <score>7</score> (replace 7 with your integer score 1-10).
 """
 
-def critic_agent(state: SAGEAgentState)-> SAGEAgentState:
+@tool
+def reward_challenger(state: CriticState)-> CriticState:
+    """This tool will reward the challenger based on the Evaluation Criteria"""
+    if state['score_quality'] >= state['alpha']:
+        state['reward_challenger'] = (state['score_quality'] + state['reward_diff'] + state['reward_format']) / 3
+    else:
+        state['reward_challenger'] = (state['score_quality'] + state['reward_format']) / 2
+
+    return state
+
+def critic_agent(state: CriticState)-> SAGEAgentState:
     """This is the Critic Agent, This Agent task is to evaluate the quality of the tasks as per the criteria/prompt"""
     if state['status']=='question':
         prompt = evaluate_question_prompt
@@ -93,3 +106,4 @@ def critic_agent(state: SAGEAgentState)-> SAGEAgentState:
 
     response = get_backbone().invoke(prompt)
     return state
+
