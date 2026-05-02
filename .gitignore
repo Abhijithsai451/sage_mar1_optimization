@@ -31,3 +31,4 @@
 /qwen_model/tokenizer_config.json
 /qwen_model/video_preprocessor_config.json
 /qwen_model/vocab.json
+/logs/
