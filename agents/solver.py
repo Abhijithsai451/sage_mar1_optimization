@@ -1,4 +1,4 @@
-from agents.agent_state import SAGEAgentState
+from states.agent_state import SAGEAgentState
 
 solver_prompt="""
 Role: Solver Agent

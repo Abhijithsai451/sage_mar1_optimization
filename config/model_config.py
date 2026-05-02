@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from langchain.chat_models import init_chat_model
 from langchain_ollama import ChatOllama
 from config.logger_config import sars_logger as logger
 load_dotenv()

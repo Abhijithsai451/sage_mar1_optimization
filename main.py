@@ -1,4 +1,7 @@
 import os
+from IPython.display import Image
+from agents.graph_workflow import create_graph
+from agents.init_agents import init_agents
 from config.model_config import get_backbone
 from dotenv import load_dotenv
 
@@ -13,11 +16,29 @@ def main():
     logger.info("Importing the dataset: [GSM8K]")
     dataset =get_data(data_dir)
     logger.info("Importing the dataset: [GSM8K] Completed")
+
+    # Importing the Backbone Model
     logger.info("Creating the backbone model: [llama3:8b]")
     llama = get_backbone()
     response = llama.test_model(greeting)
     logger.info("Backbone model Successfully created: [llama3:8b]:")
     print(f"Model-> {response}")
+
+    # Creating the Agents and the Workflow
+    agents = init_agents(llama)
+    logger.info("Agents Successfully created")
+    graph = create_graph(agents)
+    logger.info("Graph Successfully created and workflow visualization saved to agent_workflow.png")
+
+    # Training Loop comes here.
+
+    response = graph.invoke(
+
+    )
+
+
+
+
 
 if __name__ == "__main__":
     main()
