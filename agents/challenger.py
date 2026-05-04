@@ -28,22 +28,16 @@ Respond using:
 </question>
 """
 
-@tool
-def analyze_data_structure()-> str:
-    """
-    This function will read the dataset which contains the questions and answers and analyze the data structure to
-    understand the context.
-    """
 
 
-@tool
-def create_tasks(state: SAGEAgentState,model):
+
+def create_tasks(state: SAGEAgentState, model):
     """
     This tool will create the tasks based on the given reference materials.
     """
     tasks = model.invoke([
         SystemMessage(content=challenger_policy),
-        HumanMessage(content= f"Here is the reference question and answer {state['input']}, Create a task similar to this")
+        HumanMessage(content= f"Here is the question and answer {state['input']}, Create a task similar to this")
     ])
     state['tasks'] = tasks
 

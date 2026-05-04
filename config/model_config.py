@@ -14,15 +14,20 @@ class BackboneModel:
             cls._instance = super(BackboneModel, cls).__new__(cls)
 
             cls.model = ChatOllama(
-                model = "llama3:8b",
+                model = "llama3.1:8b",
                 temperature = 0,
                 base_url = "http://localhost:11434",
                 num_predict = 256
             )
         return cls._instance
+
     def invoke(self, prompt):
         """Helper to call the underlying LLM's invoke method"""
         return self.model.invoke(prompt)
+
+    def bind_tools(self, tools, **kwargs):
+        """Delegate bind_tools to the underlying LangChain model"""
+        return self.model.bind_tools(tools, **kwargs)
 
     def test_model(self, prompt):
         """Your custom test method"""

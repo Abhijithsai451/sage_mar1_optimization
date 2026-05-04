@@ -1,5 +1,7 @@
 import os
 from IPython.display import Image
+from langchain_core.messages import HumanMessage
+
 from agents.graph_workflow import create_graph
 from agents.init_agents import init_agents
 from config.model_config import get_backbone
@@ -30,11 +32,13 @@ def main():
     graph = create_graph(agents)
     logger.info("Graph Successfully created and workflow visualization saved to agent_workflow.png")
 
+    query = "adding all the 25 numbers from 1 to 25"
     # Training Loop comes here.
-
-    response = graph.invoke(
-
-    )
+    messages = [HumanMessage(content=query)]
+    response = graph.invoke({"messages":messages,
+                             "input": query})
+    for m in response["messages"]:
+        m.pretty_print()
 
 
 

@@ -28,12 +28,15 @@ def create_graph(agents):
     graph.add_node("solver",solver)
 
     graph.add_edge(START,"challenger")
+    """
     graph.add_edge("challenger","critic")
     graph.add_edge("critic","planner")
     graph.add_edge("planner","critic")
     graph.add_edge("critic","solver")
     graph.add_edge("solver","critic")
     graph.add_edge("critic",END)
+    """
+    graph.add_edge("challenger",END)
     graph = graph.compile()
     save_graph_image(graph, filename="agent_workflow.png")
     return graph
