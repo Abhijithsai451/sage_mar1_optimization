@@ -2,6 +2,7 @@ from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 from config.logger_config import  sars_logger as logger
 from states.agent_state import SAGEAgentState
+from agents.challenger import challenger
 
 def save_graph_image(app, filename="agent_workflow.png"):
     try:
@@ -19,7 +20,8 @@ def save_graph_image(app, filename="agent_workflow.png"):
         logger.info(app.get_graph().draw_mermaid())
 
 def create_graph(agents):
-    challenger, critic, planner, solver = agents
+    critic, planner, solver = agents
+
     graph = StateGraph(SAGEAgentState)
 
     graph.add_node("challenger",challenger)
@@ -28,9 +30,8 @@ def create_graph(agents):
     graph.add_node("solver",solver)
 
     graph.add_edge(START,"challenger")
-
+    """"
     graph.add_edge("challenger","critic")
-    """
     graph.add_edge("critic","planner")
     graph.add_edge("planner","critic")
     graph.add_edge("critic","solver")
@@ -38,7 +39,7 @@ def create_graph(agents):
     graph.add_edge("critic",END)
     """
 
-    graph.add_edge("critic",END)
+    graph.add_edge("challenger",END)
     graph = graph.compile()
     save_graph_image(graph, filename="agent_workflow.png")
     return graph

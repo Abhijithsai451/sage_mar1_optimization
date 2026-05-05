@@ -86,8 +86,7 @@ Important:
 Output only one tag like <score>7</score> (replace 7 with your integer score 1-10).
 """
 
-@tool
-def reward_challenger(state: SAGEAgentState, model)-> SAGEAgentState:
+def reward_challenger(state: SAGEAgentState):
     """
     This tool will reward the challenger based on the Evaluation Criteria
     if state['score_quality'] >= state['alpha']:
@@ -97,11 +96,9 @@ def reward_challenger(state: SAGEAgentState, model)-> SAGEAgentState:
 
     return state
     """
-    task = model.invoke(
-        SystemMessage(content=evaluate_question_prompt),
-        HumanMessage(content=f"Evaluate the each question in list and give a score between 1-10")
-    )
-    state['task'] = task
+    print(state['input'])
+    model = get_backbone().structured_output(SAGEAgentState)
+    model.invoke(state['input'])
     return state
 
 

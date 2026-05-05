@@ -2,22 +2,20 @@ from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_ollama import ChatOllama
 from config.logger_config import sars_logger as logger
+from states.agent_state import SAGEAgentState
 load_dotenv()
 
 class BackboneModel:
     _instance = None
-    _model = None
-    # Here we define the model and ensure we only create one instance of the model so as to be shared among the agents    def __new__(cls):
     def __new__(cls):
         if cls._instance is None:
             logger.info("Initializing the singleton Backbone Model: llama3:8b")
             cls._instance = super(BackboneModel, cls).__new__(cls)
-
-            cls.model = ChatOllama(
-                model = "llama3.1:8b",
-                temperature = 0,
-                base_url = "http://localhost:11434",
-                num_predict = 256
+            cls._instance.model = ChatOllama(
+                model="llama3.1:8b",
+                temperature=0,
+                base_url="http://localhost:11434",
+                num_predict=256
             )
         return cls._instance
 
@@ -33,7 +31,10 @@ class BackboneModel:
         """Your custom test method"""
         response = self.invoke(prompt)
         return response.content
-
+    def structured_output(self):
+        """returns the model with structured output """
+        self.model = self.model.with_structured_output(SAGEAgentState)
+        return self.model
 def get_backbone():
     return BackboneModel()
 

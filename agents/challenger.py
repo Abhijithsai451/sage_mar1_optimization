@@ -1,8 +1,12 @@
 import os
+import re
 
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain.agents import create_agent
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_core.tools import tool
 from dotenv import load_dotenv
+
+from config.model_config import get_backbone, BackboneModel
 from states.agent_state import SAGEAgentState
 load_dotenv()
 data_path = os.getenv("DATA_DIR")
@@ -28,16 +32,22 @@ Respond using:
 </question>
 """
 
-def create_tasks(state: SAGEAgentState, model):
+def challenger(state: SAGEAgentState)-> SAGEAgentState:
     """
-    Create the tasks similar to the questions.
+    First LLM Call to create tasks. .
     Each task string in the list MUST be wrapped in <question> and </question> tags.
     Example: ["<question>What is 2+2?</question>", "<question>Solve for x...</question>"]
     """
-    tasks = model.invoke([
+    model = BackboneModel().model
+    messages_for_llm = [
         SystemMessage(content=challenger_policy),
-        HumanMessage(content= f"Here is the question and answer {state['input']}, Create a task similar to this question")
-    ])
-    state['tasks'] = tasks
+        HumanMessage(
+            content=f"Here is the question and answer {state['input']}, Create a task similar to this question")
+    ]
+    response = model.invoke(messages_for_llm)
+    generated_text = response.content if isinstance(response, AIMessage) else str(response)
+    question_pattern = r"<question>(.*?)</question>"
+    generated_tasks = re.findall(question_pattern, generated_text, re.DOTALL)
 
+    state['tasks'] = generated_tasks
     return state
