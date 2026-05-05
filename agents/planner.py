@@ -13,8 +13,7 @@ Respond using:
 """
 
 def planner_agent(state: SAGEAgentState)-> SAGEAgentState:
-    #state['score_plan'] =
-    state['reward_plam'] = (state['lambda_plan']*state['score_plan'])+(state['lambda_format']* state['reward_format'])
+    state['reward_planner'] = (state['lambda_plan']*state['score_plan'])+(state['lambda_format']* state['reward_format'])
 
     return state
 

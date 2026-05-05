@@ -28,20 +28,16 @@ Respond using:
 </question>
 """
 
-
-
-
 def create_tasks(state: SAGEAgentState, model):
     """
-    This tool will create the tasks based on the given reference materials.
+    Create the tasks similar to the questions.
+    Each task string in the list MUST be wrapped in <question> and </question> tags.
+    Example: ["<question>What is 2+2?</question>", "<question>Solve for x...</question>"]
     """
     tasks = model.invoke([
         SystemMessage(content=challenger_policy),
-        HumanMessage(content= f"Here is the question and answer {state['input']}, Create a task similar to this")
+        HumanMessage(content= f"Here is the question and answer {state['input']}, Create a task similar to this question")
     ])
     state['tasks'] = tasks
 
-    return {
-        "tasks": tasks,
-        "status": "challenged"
-    }
+    return state

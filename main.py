@@ -32,13 +32,12 @@ def main():
     graph = create_graph(agents)
     logger.info("Graph Successfully created and workflow visualization saved to agent_workflow.png")
 
-    query = "adding all the 25 numbers from 1 to 25"
+    query = ["Add all the 25 numbers from 1 to 25","Pick a random number between 1 and 25 and multiply by itself."]
     # Training Loop comes here.
-    messages = [HumanMessage(content=query)]
+    messages = [HumanMessage("Generate 3 different tasks similar to the {query}")]
     response = graph.invoke({"messages":messages,
                              "input": query})
-    for m in response["messages"]:
-        m.pretty_print()
+    print(response)
 
 
 

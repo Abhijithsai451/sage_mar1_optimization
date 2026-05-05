@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from typing_extensions import List, TypedDict, Literal
 from langchain_core.messages import BaseMessage
 

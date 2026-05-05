@@ -14,9 +14,6 @@ Instructions:
 """
 
 def solver_agent(state: SAGEAgentState)-> SAGEAgentState:
-    state['w_p'] = 0.2
-    state['w_c'] = 0.6
-    state['w_f'] = 0.2
 
     if state['score_planner'] >= state['beta']:
         state['reward_solver'] = (state['w_p']*state['score_planner'])+(state['w_c']*state['score_ground_truth'])+(state['w_f']*state['reward_format'])

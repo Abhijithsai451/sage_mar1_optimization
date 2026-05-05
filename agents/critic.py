@@ -1,4 +1,5 @@
-from langchain_core.messages import tool
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.tools import tool
 
 from states.agent_state import SAGEAgentState
 from states.critic_state import CriticState
@@ -86,24 +87,22 @@ Output only one tag like <score>7</score> (replace 7 with your integer score 1-1
 """
 
 @tool
-def reward_challenger(state: CriticState)-> CriticState:
-    """This tool will reward the challenger based on the Evaluation Criteria"""
+def reward_challenger(state: SAGEAgentState, model)-> SAGEAgentState:
+    """
+    This tool will reward the challenger based on the Evaluation Criteria
     if state['score_quality'] >= state['alpha']:
         state['reward_challenger'] = (state['score_quality'] + state['reward_diff'] + state['reward_format']) / 3
     else:
         state['reward_challenger'] = (state['score_quality'] + state['reward_format']) / 2
 
     return state
-
-def critic_agent(state: CriticState)-> SAGEAgentState:
-    """This is the Critic Agent, This Agent task is to evaluate the quality of the tasks as per the criteria/prompt"""
-    if state['status']=='question':
-        prompt = evaluate_question_prompt
-    if state['status']=='plan':
-        prompt = evaluate_plan_prompt
-    if state['status'] == 'solve':
-        prompt = evaluate_solution_prompt
-
-    response = get_backbone().invoke(prompt)
+    """
+    task = model.invoke(
+        SystemMessage(content=evaluate_question_prompt),
+        HumanMessage(content=f"Evaluate the each question in list and give a score between 1-10")
+    )
+    state['task'] = task
     return state
+
+
 
