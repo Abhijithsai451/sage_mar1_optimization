@@ -44,8 +44,6 @@ def main():
     }
 
     response = graph.invoke(initial_state)
-    print(response)
-
     if 'tasks' in response and response['tasks']:
         print("\nGenerated Tasks from Challenger:")
         for task in response['tasks']:

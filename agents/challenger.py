@@ -33,21 +33,20 @@ Respond using:
 """
 
 def challenger(state: SAGEAgentState)-> SAGEAgentState:
-    """
-    First LLM Call to create tasks. .
-    Each task string in the list MUST be wrapped in <question> and </question> tags.
-    Example: ["<question>What is 2+2?</question>", "<question>Solve for x...</question>"]
-    """
-    model = BackboneModel().model
-    messages_for_llm = [
-        SystemMessage(content=challenger_policy),
-        HumanMessage(
-            content=f"Here is the question and answer {state['input']}, Create a task similar to this question")
+    model = get_backbone()
+    user_content = f"Dataset Reference Examples: \n {state['input']} \n\nPlease generate a set of 5 new tasks following the reference style."
+    messages = [
+        SystemMessage(content = challenger_policy),
+        HumanMessage(content = user_content)
     ]
-    response = model.invoke(messages_for_llm)
-    generated_text = response.content if isinstance(response, AIMessage) else str(response)
-    question_pattern = r"<question>(.*?)</question>"
-    generated_tasks = re.findall(question_pattern, generated_text, re.DOTALL)
+    reponse = model.invoke(messages)
+    content = reponse.content
+    # Extracting the question from tags
+    match = re.search(r'<question>(.*?)</question>', content, re.DOTALL)
+    extracted_task = match.group(1).strip() if match else content
 
-    state['tasks'] = generated_tasks
-    return state
+    return {
+        "tasks": [extracted_task],
+        "messages": [AIMessage(content=f"Challenger generated task: {extracted_task}")],
+        "status": "challenged"
+    }

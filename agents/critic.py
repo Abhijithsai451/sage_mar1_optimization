@@ -87,19 +87,40 @@ Output only one tag like <score>7</score> (replace 7 with your integer score 1-1
 """
 
 def reward_challenger(state: SAGEAgentState):
+    user_content = """Review each task in  {state['tasks']} . Please provide a reward between 1-10 for each task. 
+    Please follow the basic equations for scoring. 
+    state['reward_challenger'] = (state['score_quality'] + state['reward_diff'] + state['reward_format']) / 3
+    here
+    state['reward_format'] is the reward for the format of the questions. (score it between 1 to 10)
+    state['reward_diff'] is the difficulty of the questions from the tasks. (score it between 1 to 10)
+    state['score_quality'] is the score of the quality of the questions. (score it between 1 to 10)
+    
+    Eventually the average of the three score will be the reward for the challenger. Assign it for each question with a tag like 
+    <reward>7</reward> (replace 7 with your integer score 1-10).
     """
-    This tool will reward the challenger based on the Evaluation Criteria
-    if state['score_quality'] >= state['alpha']:
-        state['reward_challenger'] = (state['score_quality'] + state['reward_diff'] + state['reward_format']) / 3
+    messages = [
+        SystemMessage(content=evaluate_question_prompt),
+        HumanMessage(content=user_content + f"Tasks: {state['tasks']}")
+    ]
+
+    return messages
+
+def critic(state: SAGEAgentState):
+    model = get_backbone()
+    current_status = state["status"]
+    # 1. Determine which prompt to use based on the loop status
+    if current_status == "challenged":
+       messages = reward_challenger(state)
+       response = model.invoke(messages)
+       print(f"Response from the critic is: {response.content}")
+       return state
+    elif current_status == "planned":
+        print("Evaluating the Plan")
+
+    elif current_status == "solved":
+        print("Evaluating the Solution")
     else:
-        state['reward_challenger'] = (state['score_quality'] + state['reward_format']) / 2
+        return state
 
     return state
-    """
-    print(state['input'])
-    model = get_backbone().structured_output(SAGEAgentState)
-    model.invoke(state['input'])
-    return state
-
-
 

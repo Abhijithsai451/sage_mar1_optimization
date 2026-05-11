@@ -7,11 +7,7 @@ from config.logger_config import  sars_logger as logger
 def init_agents(model_name):
     logger.info("Initializing Agents...")
 
-    critic = create_agent(
-        model=model_name,
-        tools = [reward_challenger],
-        response_format=SAGEAgentState
-    )
+
     planner = create_agent(
         model=model_name,
         response_format=SAGEAgentState
@@ -20,4 +16,4 @@ def init_agents(model_name):
         model=model_name,
         response_format=SAGEAgentState
     )
-    return [critic, planner, solver]
+    return [planner, solver]

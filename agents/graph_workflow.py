@@ -1,5 +1,6 @@
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
+from agents.critic import critic
 from config.logger_config import  sars_logger as logger
 from states.agent_state import SAGEAgentState
 from agents.challenger import challenger
@@ -18,9 +19,16 @@ def save_graph_image(app, filename="agent_workflow.png"):
         # Fallback: Print the Mermaid string which you can paste into mermaid.live
         logger.info("\nMermaid Diagram String:")
         logger.info(app.get_graph().draw_mermaid())
+def route_critic(state: SAGEAgentState):
+    if state["status"] == "challenged":
+        return "planner"
+    elif state["status"] == "planned":
+        return "solver"
+    return END
+
 
 def create_graph(agents):
-    critic, planner, solver = agents
+    planner, solver = agents
 
     graph = StateGraph(SAGEAgentState)
 
@@ -30,8 +38,9 @@ def create_graph(agents):
     graph.add_node("solver",solver)
 
     graph.add_edge(START,"challenger")
-    """"
+
     graph.add_edge("challenger","critic")
+    """"
     graph.add_edge("critic","planner")
     graph.add_edge("planner","critic")
     graph.add_edge("critic","solver")
@@ -39,7 +48,7 @@ def create_graph(agents):
     graph.add_edge("critic",END)
     """
 
-    graph.add_edge("challenger",END)
+    graph.add_edge("critic",END)
     graph = graph.compile()
     save_graph_image(graph, filename="agent_workflow.png")
     return graph
