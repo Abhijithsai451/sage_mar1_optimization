@@ -6,6 +6,7 @@ class CriticState(BaseModel):
     alpha: float = 0.7
     reward_diff: float
 
+
     # Planner
     beta: float = 0.3
     lambda_plan: float = 0.5
