@@ -4,8 +4,8 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import tool
 
 from states.agent_state import SAGEAgentState
-from states.critic_state import CriticState
-from config.model_config import get_backbone
+from states.parameter_state import ParameterState
+from config.model_config import get_backbone, BackboneModel
 from states.tasks_state import TasksState
 
 evaluate_question_prompt="""
@@ -88,40 +88,49 @@ Provide your final score.
 Important:
 Output only one tag like <score>7</score> (replace 7 with your integer score 1-10).
 """
-
-def reward_challenger(tasks):
+@tool
+def reward_challenger(question):
     """Constructs the messages for the challenger reward phase."""
     user_content = """
-    Review every task in  {state['tasks']} . Please provide a reward between 1-10 for each task. 
+    Role: You are a rewarding agent.
+    Review every question in {question} . Please provide a reward between 1-10 for each task as shown in the example. 
+    example : 
+    <rewards>
+    <reward_challenger>10</reward_challenger> 
+    </rewards>
     Please follow the basic equations below for scoring. 
     state['reward_challenger'] = (state['score_quality'] + state['reward_diff'] + state['reward_format']) / 3
     here
     state['reward_format'] is the reward for the format of the questions. (score it between 1 to 10)
     state['reward_diff'] is the difficulty of the questions from the tasks. (score it between 1 to 10)
     state['score_quality'] is the score of the quality of the questions. (score it between 1 to 10)
-    
-    Eventually the average of the three score will be the reward for the challenger. Assign it for each question with a tag like 
-    <reward_challenger>7</reward_challenger> (replace 7 with your integer score 1-10).
+    Eventually the average of the three score will be the reward for the challenger. 
+    example: 
+    reward_challenger = state['reward_format'] + state['reward_diff'] + state['score_quality']/3
+                        = (8 + 5 + 8 )/ 3
+                        = 7
+    reward_challenger = 7
     """
     messages = [
         SystemMessage(
-            content=evaluate_question_prompt + "\nOutput in format: <tasks><task><question>...</question><reward>...</reward></task></tasks>"),
-        HumanMessage(content=f"Evaluate these tasks:\n{tasks}")
+            content=evaluate_question_prompt + "\nOutput in format: [8,9,3,4]"),
+        HumanMessage(content=f"Evaluate these tasks:\n{question}")
     ]
 
     return messages
 
-def critic(state: SAGEAgentState):
-    model = get_backbone()
-    current_status = state["status"]
-    # 1. Determine which prompt to use based on the loop status
+def critic(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
+    current_status = state.status
     if current_status == "challenged":
-        tasks = "\n".join([f"- {t}" for t in state["tasks"]])
-        messages = reward_challenger(tasks)
+        user_content = f""
+        questions = [task.question for task in state.tasks]
+        #messages = reward_challenger(questions)
+        messages = [
+            SystemMessage(content=evaluate_question_prompt),
+            HumanMessage(content=user_content)
+        ]
         response = model.invoke(messages)
-        print(f"Response from the critic is: {response.content}")
-        content = response.content
-
+        print(response)
     elif current_status == "planned":
         print("Evaluating the Plan")
 

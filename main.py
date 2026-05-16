@@ -11,6 +11,9 @@ from config import model_config
 from config.data_config import get_data
 from config.logger_config import  sars_logger as logger
 from states.agent_state import SAGEAgentState
+from states.rewards import RewardState
+from states.scores import ScoreState
+from states.tasks_state import TasksState
 
 load_dotenv()
 data_dir = os.getenv("DATA_DIR")
@@ -31,17 +34,18 @@ def main():
     # Creating the Agents and the Workflow
     agents = init_agents(llama)
     logger.info("Agents Successfully created")
-    graph = create_graph(agents)
+    graph = create_graph(agents, llama)
     logger.info("Graph Successfully created and workflow visualization saved to agent_workflow.png")
 
     query = ["Add all the 25 numbers from 1 to 25","Pick a random number between 1 and 25 and multiply by itself."]
     # Training Loop comes here.
     messages = [HumanMessage(content = f"Generate 3 different mathematical tasks similar to the {query}")]
-    initial_state: SAGEAgentState = {
-        "messages": messages,
-        "input": query,
-        "tasks": []
-    }
+    initial_state = SAGEAgentState(
+        messages=messages,
+        input=query,
+        tasks=[],
+        status="Initialized"
+    )
 
     response = graph.invoke(initial_state)
     if 'tasks' in response and response['tasks']:

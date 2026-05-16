@@ -1,9 +1,11 @@
+from functools import partial
+
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
-from agents.critic import critic
+from agents.critic import critic as critic_node
 from config.logger_config import  sars_logger as logger
 from states.agent_state import SAGEAgentState
-from agents.challenger import challenger
+from agents.challenger import challenger as challenger_node
 
 def save_graph_image(app, filename="agent_workflow.png"):
     try:
@@ -27,10 +29,15 @@ def route_critic(state: SAGEAgentState):
     return END
 
 
-def create_graph(agents):
+def create_graph(agents, llm_instance):
     planner, solver = agents
 
     graph = StateGraph(SAGEAgentState)
+    challenger = partial(challenger_node, model=llm_instance)
+    critic = partial(critic_node, model=llm_instance)
+    #planner = partial(planner.planner_node, model=llm_instance)
+    #solver = partial(solver.solver_node, model=llm_instance)
+
 
     graph.add_node("challenger",challenger)
     graph.add_node("critic",critic)
