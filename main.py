@@ -1,13 +1,10 @@
 import os
-from IPython.display import Image
 from langchain_core.messages import HumanMessage, AIMessage
 
 from agents.graph_workflow import create_graph
 from agents.init_agents import init_agents
 from config.model_config import get_backbone
 from dotenv import load_dotenv
-
-from config import model_config
 from config.data_config import get_data
 from config.logger_config import  sars_logger as logger
 from states.agent_state import SAGEAgentState

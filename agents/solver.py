@@ -1,4 +1,5 @@
 from states.agent_state import SAGEAgentState
+from config.logger_config import  sars_logger as logger
 
 solver_prompt="""
 Role: Solver Agent

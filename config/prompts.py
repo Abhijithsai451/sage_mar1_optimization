@@ -113,4 +113,18 @@ Respond using:
 </task>
 """
 
+#%% Planner Prompts
+planner_policy="""
+Role: Planner Agent
+Description:
+You will review the user problem and propose a concise plan that a solver can follow.
+Problem:{question}
+Respond using:
+<task>
+<question>Question goes here</question>
+<plan>Your proposed plan goes here</plan>
+<score_ground_truth>8</score_ground_truth>
+</task>
+And do not include any other text.
+"""
 

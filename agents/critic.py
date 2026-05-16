@@ -1,6 +1,6 @@
 import json
 import re
-
+from config.logger_config import  sars_logger as logger
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import tool
 
@@ -42,6 +42,7 @@ def reward_challenger(question):
 
 def critic(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
     current_status = state.status
+    logger.info(f"[Critic]: Initiated the Critic Agent and Evaluating the {current_status} phase")
     if current_status == "challenged":
         user_content = f"evaluate each question in the list and provide a score between 1-10 for each task."
         questions = "\n\n".join([f"Task {i+1}:\n{task_item.question}" for i, task_item in enumerate(state.tasks)])
@@ -51,15 +52,18 @@ def critic(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
             HumanMessage(content=user_content + questions)
         ]
         response = model.invoke(messages)
+        logger.info("[Critic]: Critic Agent created the Response ")
         task_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
         tasks = []
         extracted_tasks = []
+        logger.info("[Critic]: Extracting the tasks from the response and creating the state objects")
         for task_block in task_blocks:
             question_tags = re.search(r"<question>(.*?)</question>", task_block, re.DOTALL)
             question = question_tags.group(1).strip()
             score_tags = re.search(r"<score_ground_truth>(.*?)</score_ground_truth>", task_block, re.DOTALL)
             score = score_tags.group(1).strip()
             tasks.append({"question": question, "score": score})
+        logger.info("[Critic]: Extracted the tasks and creating the state objects")
         for task in tasks:
             question = task.get("question")
             score = task.get("score")
@@ -73,10 +77,8 @@ def critic(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
                 )
             )
         state.tasks = extracted_tasks
-        print(state.tasks)
-        state.status = "challenged"
-
-
+        logger.info("[Critic]: Updated the state with the new tasks")
+        return state
     elif current_status == "planned":
         print("Evaluating the Plan")
 
