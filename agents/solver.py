@@ -14,10 +14,7 @@ Instructions:
 - Do not introduce additional wrappers/tags unless explicitly required
 """
 
-def solver_agent(state: SAGEAgentState)-> SAGEAgentState:
+def solver(state: SAGEAgentState)-> SAGEAgentState:
 
-    if state['score_planner'] >= state['beta']:
-        state['reward_solver'] = (state['w_p']*state['score_planner'])+(state['w_c']*state['score_ground_truth'])+(state['w_f']*state['reward_format'])
-    else:
-        state['reward_solver'] = (state['w_c']*state['reward_challenger'])+(state['w_f']*state['reward_format'])
+
     return state
