@@ -1,19 +1,20 @@
 import re
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import SystemMessage, HumanMessage
 from config import prompts
-from config.model_config import get_backbone, BackboneModel
+from config.logger_config import sars_logger as logger
+from config.model_config import BackboneModel
 from states.agent_state import SAGEAgentState
 from states.rewards import RewardState
 from states.scores import ScoreState
 from states.tasks_state import TasksState
-from config.logger_config import  sars_logger as logger
 
-def challenger(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
+
+def challenger(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     logger.info("[Challenger]: Initiating the Challenger Agent")
     user_content = f"Dataset Reference Examples: \n {state.input} \n\nPlease generate a set of 5 new tasks following the reference style."
     messages = [
-        SystemMessage(content = prompts.challenger_policy),
-        HumanMessage(content = user_content)
+        SystemMessage(content=prompts.challenger_policy),
+        HumanMessage(content=user_content)
     ]
     response = model.invoke(messages)
     content = response.content
@@ -25,12 +26,12 @@ def challenger(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
         task_cleaned = task.strip()
         if task_cleaned:
             tasks.append(TasksState(
-                    question=task_cleaned,
-                    rewards=RewardState(),
-                    score=ScoreState(score_quality="", score_planner="", score_ground_truth=""),
-                    plan="",
-                    solution=""
-                )
+                question=task_cleaned,
+                rewards=RewardState(),
+                score=ScoreState(score_quality="", score_planner="", score_ground_truth=""),
+                plan="",
+                solution=""
+            )
             )
     state.tasks = state.tasks + tasks
     logger.info("[Challenger]: Updated the state with the new tasks")
