@@ -56,7 +56,6 @@ Provide your final score.
 Important:Format your response in as follow. 
 <task>
 <question>Question goes here</question>
-<score_ground_truth>8</score_ground_truth>
 <score_planner>8</score_planner>
 </task>
 And do not include any other text.

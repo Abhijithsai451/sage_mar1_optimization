@@ -42,45 +42,63 @@ def reward_challenger(question):
 
 def critic(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
     current_status = state.status
-    logger.info(f"[Critic]: Initiated the Critic Agent and Evaluating the {current_status} phase")
+
     if current_status == "challenged":
+        logger.info(f"[Critic_Challenger]: Initiated the Critic Agent and Evaluating the {current_status} phase")
         user_content = f"evaluate each question in the list and provide a score between 1-10 for each task."
-        questions = "\n\n".join([f"Task {i+1}:\n{task_item.question}" for i, task_item in enumerate(state.tasks)])
+        questions = "\n\n".join([f"Question {i+1}:\n{task_item.question}" for i, task_item in enumerate(state.tasks)])
         #messages = reward_challenger(questions)
         messages = [
             SystemMessage(content=prompts.evaluate_question_prompt),
             HumanMessage(content=user_content + questions)
         ]
         response = model.invoke(messages)
-        logger.info("[Critic]: Critic Agent created the Response ")
-        task_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
-        tasks = []
-        extracted_tasks = []
-        logger.info("[Critic]: Extracting the tasks from the response and creating the state objects")
-        for task_block in task_blocks:
-            question_tags = re.search(r"<question>(.*?)</question>", task_block, re.DOTALL)
+        logger.info("[Critic_Challenger]: Critic Agent created the Response ")
+        scores_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
+        task_scores = []
+        extracted_scores = []
+        logger.info("[Critic_Challenger]: Extracting the tasks from the response and creating the state objects")
+        for scores_block in scores_blocks:
+            question_tags = re.search(r"<question>(.*?)</question>", scores_block, re.DOTALL)
             question = question_tags.group(1).strip()
-            score_tags = re.search(r"<score_ground_truth>(.*?)</score_ground_truth>", task_block, re.DOTALL)
+            score_tags = re.search(r"<score_ground_truth>(.*?)</score_ground_truth>", scores_block, re.DOTALL)
             score = score_tags.group(1).strip()
-            tasks.append({"question": question, "score": score})
-        logger.info("[Critic]: Extracted the tasks and creating the state objects")
-        for task in tasks:
-            question = task.get("question")
-            score = task.get("score")
-            extracted_tasks.append(
-                TasksState(
-                    question=question,
-                    rewards=RewardState(),
-                    score=ScoreState(score_quality="", score_planner="", score_ground_truth=score),
-                    plan="",
-                    solution=""
-                )
-            )
-        state.tasks = extracted_tasks
-        logger.info("[Critic]: Updated the state with the new tasks")
+            task_scores.append({"question": question, "score": score})
+        logger.info("[Critic_Challenger]: Extracted the tasks and creating the state objects")
+        for i in range(len(task_scores)):
+            question = task_scores[i].get("question")
+            score = task_scores[i].get("score")
+            if question == state.tasks[i].question:
+                state.tasks[i].score.score_ground_truth = score
+        logger.info("[Critic_Challenger]: Updated the state with the new tasks")
         return state
     elif current_status == "planned":
-        print("Evaluating the Plan")
+        logger.info(f"[Critic_Planner]: Initiated the Critic Agent and Evaluating the {current_status} phase")
+        user_content = f"evaluate each plan in the list and provide a score between 1-10 for each task."
+        plans = "\n\n".join([f"Plan {i + 1}:\n{task_item.question} + \n{task_item.plan}" for i, task_item in enumerate(state.tasks)])
+        messages = [
+            SystemMessage(content=prompts.evaluate_plan_prompt),
+            HumanMessage(content=user_content + plans)
+        ]
+        response = model.invoke(messages)
+        logger.info("[Critic_Planner]: Critic Agent created the Scores for the Plans ")
+        scores_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
+        plan_scores = []
+        logger.info("[Critic_Planner]: Extracting the tasks from the response and creating the state objects")
+        for scores_block in scores_blocks:
+            question_tags = re.search(r"<question>(.*?)</question>", scores_block, re.DOTALL)
+            question = question_tags.group(1).strip()
+            score_tags = re.search(r"<score_planner>(.*?)</score_planner>", scores_block, re.DOTALL)
+            score = score_tags.group(1).strip()
+            plan_scores.append({"question": question, "score": score})
+        logger.info("[Critic_Planner]: Extracted the Plan Scores and creating the state objects")
+        for i in range(len(plan_scores)):
+            question = plan_scores[i].get("question")
+            score = plan_scores[i].get("score")
+            if question == state.tasks[i].question:
+                state.tasks[i].score.score_planner = score
+        logger.info("[Critic_Planner]: Updated the state with the Planning Scores")
+        return state
 
     elif current_status == "solved":
         print("Evaluating the Solution")
