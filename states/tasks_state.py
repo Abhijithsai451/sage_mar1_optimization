@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
+
 from states.rewards import RewardState
 from states.scores import ScoreState
+
 
 class TasksState(BaseModel):
     question: str
@@ -8,6 +10,3 @@ class TasksState(BaseModel):
     score: ScoreState = Field(default_factory=ScoreState)
     plan: str = ""
     solution: str = ""
-
-
-

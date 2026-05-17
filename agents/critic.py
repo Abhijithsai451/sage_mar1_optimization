@@ -1,16 +1,13 @@
-import json
 import re
-from config.logger_config import  sars_logger as logger
+
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import tool
 
 from config import prompts
+from config.logger_config import sars_logger as logger
+from config.model_config import BackboneModel
 from states.agent_state import SAGEAgentState
-from states.parameter_state import ParameterState
-from config.model_config import get_backbone, BackboneModel
-from states.rewards import RewardState
-from states.scores import ScoreState
-from states.tasks_state import TasksState
+
 
 @tool
 def reward_challenger(question):
@@ -40,14 +37,14 @@ def reward_challenger(question):
 
     return messages
 
-def critic(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
+
+def critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     current_status = state.status
 
     if current_status == "challenged":
         logger.info(f"[Critic_Challenger]: Initiated the Critic Agent and Evaluating the {current_status} phase")
         user_content = f"evaluate each question in the list and provide a score between 1-10 for each task."
-        questions = "\n\n".join([f"Question {i+1}:\n{task_item.question}" for i, task_item in enumerate(state.tasks)])
-        #messages = reward_challenger(questions)
+        questions = "\n\n".join([f"Question {i + 1}:\n{task_item.question}" for i, task_item in enumerate(state.tasks)])
         messages = [
             SystemMessage(content=prompts.evaluate_question_prompt),
             HumanMessage(content=user_content + questions)
@@ -56,7 +53,6 @@ def critic(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
         logger.info("[Critic_Challenger]: Critic Agent created the Response ")
         scores_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
         task_scores = []
-        extracted_scores = []
         logger.info("[Critic_Challenger]: Extracting the tasks from the response and creating the state objects")
         for scores_block in scores_blocks:
             question_tags = re.search(r"<question>(.*?)</question>", scores_block, re.DOTALL)
@@ -75,7 +71,8 @@ def critic(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
     elif current_status == "planned":
         logger.info(f"[Critic_Planner]: Initiated the Critic Agent and Evaluating the {current_status} phase")
         user_content = f"evaluate each plan in the list and provide a score between 1-10 for each task."
-        plans = "\n\n".join([f"Plan {i + 1}:\n{task_item.question} + \n{task_item.plan}" for i, task_item in enumerate(state.tasks)])
+        plans = "\n\n".join(
+            [f"Plan {i + 1}:\n{task_item.question} + \n{task_item.plan}" for i, task_item in enumerate(state.tasks)])
         messages = [
             SystemMessage(content=prompts.evaluate_plan_prompt),
             HumanMessage(content=user_content + plans)
@@ -106,4 +103,3 @@ def critic(state: SAGEAgentState, model: BackboneModel)-> SAGEAgentState:
         return state
 
     return state
-
