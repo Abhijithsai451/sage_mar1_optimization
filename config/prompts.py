@@ -118,12 +118,12 @@ Role: Planner Agent
 Description:
 You will review the user problem and propose a concise plan that a solver can follow.
 Problem:{question}
-Respond using:
+Response Format should be like below:
 <task>
 <question>Question goes here</question>
-<plan>Your proposed plan goes here</plan>
+<plan>Your proposed plan goes here</plan> 
 </task>
-And do not include any other text.
+Make sure you include all the tags And do not include any other text.
 """
 # %% Solver Prompts
 solver_policy = """

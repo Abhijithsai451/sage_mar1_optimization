@@ -17,8 +17,7 @@ class BackboneModel:
             cls._instance.model = ChatOllama(
                 model="llama3.1:8b",
                 temperature=0,
-                base_url="http://localhost:11434",
-                num_predict=5000,
+                base_url="http://localhost:11434"
             )
         return cls._instance
 
