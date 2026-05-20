@@ -16,20 +16,21 @@ def planner(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     ]
     response = model.invoke(messages)
     logger.info("[Planner]: Created the Plans for every question ")
-    task_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
-    tasks = []
+    plan_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
+    plans = []
+    print(plan_blocks)
     logger.info("[Planner]: Extracting the tasks from the response and creating the state objects")
-    for task_block in task_blocks:
-        question_tags = re.search(r"<question>(.*?)</question>", task_block, re.DOTALL)
+    for plan_block in plan_blocks:
+        question_tags = re.search(r"<question>(.*?)</question>", plan_block, re.DOTALL)
         question = question_tags.group(1).strip()
-        plan_tags = re.search(r"<plan>(.*?)</plan>", task_block, re.DOTALL)
+        plan_tags = re.search(r"<plan>(.*?)</plan>", plan_block, re.DOTALL)
         plan = plan_tags.group(1).strip()
-        tasks.append({"question": question, "plan": plan})
+        plans.append({"question": question, "plan": plan})
     logger.info("[Planner]: Extracted the tasks from the response")
 
-    for i in range(len(tasks)):
-        question = tasks[i].get("question")
-        plan = tasks[i].get("plan")
+    for i in range(len(plans)):
+        question = plans[i].get("question")
+        plan = plans[i].get("plan")
         if question == state.tasks[i].question:
             state.tasks[i].plan = plan
     state.status = "planned"

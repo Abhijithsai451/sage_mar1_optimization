@@ -38,7 +38,7 @@ def reward_challenger(question):
     return messages
 
 
-def critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
+def question_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     current_status = state.status
 
     if current_status == "challenged":
@@ -67,16 +67,18 @@ def critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
             if question == state.tasks[i].question:
                 state.tasks[i].score.score_ground_truth = score
         logger.info("[Critic_Challenger]: Updated the state with the new tasks")
-        return state
-    elif current_status == "planned":
+    return state
+
+def plan_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
+    current_status = state.status
+    if current_status == "planned":
         logger.info(f"[Critic_Planner]: Initiated the Critic Agent and Evaluating the {current_status} phase")
         user_content = f"evaluate each plan in the list and provide a score between 1-10 for each task."
-        plans = "\n\n".join(
-            [f"Plan {i + 1}:\n{task_item.question} + \n{task_item.plan}" for i, task_item in enumerate(state.tasks)])
+        plans = "\n\n".join([f"Plan {i + 1}:\n{task_item.question} + \n{task_item.plan}" for i, task_item in enumerate(state.tasks)])
         messages = [
-            SystemMessage(content=prompts.evaluate_plan_prompt),
-            HumanMessage(content=user_content + plans)
-        ]
+                SystemMessage(content=prompts.evaluate_plan_prompt),
+                HumanMessage(content=user_content + plans)
+            ]
         response = model.invoke(messages)
         logger.info("[Critic_Planner]: Critic Agent created the Scores for the Plans ")
         scores_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
@@ -94,12 +96,9 @@ def critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
             score = plan_scores[i].get("score")
             if question == state.tasks[i].question:
                 state.tasks[i].score.score_planner = score
-        logger.info("[Critic_Planner]: Updated the state with the Planning Scores")
-        return state
-
-    elif current_status == "solved":
-        print("Evaluating the Solution")
-    else:
-        return state
-
+                logger.info("[Critic_Planner]: Updated the state with the Planning Scores")
     return state
+
+def solution_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
+    current_status = state.status
+    pass
