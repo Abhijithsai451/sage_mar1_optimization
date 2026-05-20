@@ -19,7 +19,6 @@ class BackboneModel:
                 temperature=0,
                 base_url="http://localhost:11434",
                 num_predict=5000,
-
             )
         return cls._instance
 
