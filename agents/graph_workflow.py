@@ -16,7 +16,6 @@ from states.agent_state import SAGEAgentState
 def save_graph_image(app, filename="agent_workflow.png"):
     try:
         graph_png = app.get_graph().draw_mermaid_png()
-
         with open(filename, "wb") as f:
             f.write(graph_png)
         logger.info(f"Workflow visualization saved to {filename}")
@@ -25,7 +24,6 @@ def save_graph_image(app, filename="agent_workflow.png"):
         # Fallback: Print the Mermaid string which you can paste into mermaid.live
         logger.info("\nMermaid Diagram String:")
         logger.info(app.get_graph().draw_mermaid())
-
 
 def create_graph(llm_instance):
     graph = StateGraph(SAGEAgentState)

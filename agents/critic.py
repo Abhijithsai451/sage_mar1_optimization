@@ -60,6 +60,7 @@ def question_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentSta
             score_tags = re.search(r"<score_ground_truth>(.*?)</score_ground_truth>", scores_block, re.DOTALL)
             score = score_tags.group(1).strip()
             task_scores.append({"question": question, "score": score})
+        print(task_scores)
         logger.info("[Critic_Challenger]: Extracted the tasks and creating the state objects")
         for i in range(len(task_scores)):
             question = task_scores[i].get("question")
@@ -90,6 +91,7 @@ def plan_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
             score_tags = re.search(r"<score_planner>(.*?)</score_planner>", scores_block, re.DOTALL)
             score = score_tags.group(1).strip()
             plan_scores.append({"question": question, "score": score})
+        print(plan_scores)
         logger.info("[Critic_Planner]: Extracted the Plan Scores and creating the state objects")
         for i in range(len(plan_scores)):
             question = plan_scores[i].get("question")
@@ -101,4 +103,32 @@ def plan_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
 
 def solution_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     current_status = state.status
-    pass
+    if current_status == "solved":
+        logger.info(f"[Critic_Solver]: Initiated the Critic Agent and Evaluating the {current_status} phase")
+        user_content = f"evaluate each Solution in the list and provide a score between 1-10 for each task."
+        solutions = "\n\n".join(
+            [f"question {i + 1}:\n{task_item.question} + \n{task_item.solution}" for i, task_item in enumerate(state.tasks)])
+        messages = [
+            SystemMessage(content=prompts.evaluate_solution_prompt),
+            HumanMessage(content=user_content + solutions)
+        ]
+        response = model.invoke(messages)
+        logger.info("[Critic_Solver]: Critic Agent created the Scores for the Solutions ")
+        scores_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
+        solution_scores = []
+        logger.info("[Critic_Solver]: Extracting the tasks from the response and creating the state objects")
+        for scores_block in scores_blocks:
+            question_tags = re.search(r"<question>(.*?)</question>", scores_block, re.DOTALL)
+            question = question_tags.group(1).strip()
+            score_tags = re.search(r"<score_quality>(.*?)</score_quality>", scores_block, re.DOTALL)
+            score = score_tags.group(1).strip()
+            solution_scores.append({"question": question, "score": score})
+        print(solution_scores)
+        logger.info("[Critic_Solver]: Extracted the Plan Scores and creating the state objects")
+        for i in range(len(solution_scores)):
+            question = solution_scores[i].get("question")
+            score = solution_scores[i].get("score")
+            if question == state.tasks[i].question:
+                state.tasks[i].score.score_quality = score
+        logger.info("[Critic_Solver]: Updated the state with the Planning Scores")
+    return state

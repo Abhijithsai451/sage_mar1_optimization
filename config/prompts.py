@@ -21,11 +21,11 @@ Critical Rule:
 If any unsolvability or commonsense violation exists, score must be [1-3].
 [Write your detailed analysis here, addressing each criterion.]
 <\think>
-Provide your final score.
-Important:Format your response in as follow. 
+Provide your final score as score_ground_truth.
+Important: Strictly Format your response in as follow. 
 <task>
 <question>Question goes here</question>
-<score_ground_truth>8</score_ground_truth>
+<score_ground_truth>Give your Score here </score_ground_truth>
 </task>
 And do not include any other text.
 """
@@ -50,13 +50,11 @@ Scoring Guidelines:
 - 1-3: Poor plan - unclear, incomplete, logically flawed, or unlikely to lead to a correct solution.
 [Write your detailed analysis here, addressing each criterion.]
 </think>
-Provide your final score.
-Important:
-Provide your final score.
-Important:Format your response in as follow. 
+Provide your final score as score_planner.
+Important:Strictly Format your response in as follow. 
 <task>
 <question>Question goes here</question>
-<score_planner>8</score_planner>
+<score_planner>Give your Score here </score_planner>
 </task>
 And do not include any other text.
 """
@@ -85,9 +83,14 @@ Critical Rules:
 - Meaningless repetition or excessive rambling → score must be [1-3]
 [Write your detailed analysis here, addressing each criterion. If any critical issue exists, note that the score must be [1-3].]
 <\think>
-Provide your final score.
+Provide your final score as score_quality.
 Important:
-Output only one tag like <score>7</score> (replace 7 with your integer score 1-10).
+Important:Strictly Format your response in as follow. 
+<task>
+<question>Question goes here</question>
+<score_quality>Give your score here </score_quality>
+</task>
+And do not include any other text.
 """
 
 # %%  Challenger Prompts
