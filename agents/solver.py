@@ -5,6 +5,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from config import prompts
 from config.logger_config import sars_logger as logger
 from config.model_config import BackboneModel
+from config.database_utils import save_agent_state
 from states.agent_state import SAGEAgentState
 
 
@@ -39,4 +40,5 @@ def solver(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     logger.info("[Solver]: Updated the state with the new solutions")
     state.status = "solved"
     logger.info(f"[Solver]: Updated the state with the new status {state.status}")
+    save_agent_state(state)
     return state

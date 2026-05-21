@@ -1,7 +1,8 @@
-from pydantic import BaseModel
-
+from pydantic import BaseModel, Field
+import uuid
 
 class ParameterState(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     # Challenger
     alpha: float = 0.7
 
