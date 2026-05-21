@@ -6,6 +6,7 @@ from langchain_core.tools import tool
 from config import prompts
 from config.logger_config import sars_logger as logger
 from config.model_config import BackboneModel
+from config.database_utils import save_agent_state
 from states.agent_state import SAGEAgentState
 
 
@@ -68,6 +69,7 @@ def question_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentSta
             if question == state.tasks[i].question:
                 state.tasks[i].score.score_ground_truth = score
         logger.info("[Critic_Challenger]: Updated the state with the new tasks")
+    save_agent_state(state)
     return state
 
 def plan_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
@@ -99,6 +101,7 @@ def plan_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
             if question == state.tasks[i].question:
                 state.tasks[i].score.score_planner = score
                 logger.info("[Critic_Planner]: Updated the state with the Planning Scores")
+    save_agent_state(state)
     return state
 
 def solution_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
@@ -131,4 +134,5 @@ def solution_critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentSta
             if question == state.tasks[i].question:
                 state.tasks[i].score.score_quality = score
         logger.info("[Critic_Solver]: Updated the state with the Planning Scores")
+    save_agent_state(state)
     return state

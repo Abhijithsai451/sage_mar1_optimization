@@ -3,6 +3,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from config import prompts
 from config.logger_config import sars_logger as logger
 from config.model_config import BackboneModel
+from config.database_utils import save_agent_state
 from states.agent_state import SAGEAgentState
 
 
@@ -35,4 +36,5 @@ def planner(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
             state.tasks[i].plan = plan
     state.status = "planned"
     logger.info(f"[Planner]: Updated the state with the new status {state.status}")
+    save_agent_state(state)
     return state
