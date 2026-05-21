@@ -45,19 +45,7 @@ def init_database():
         score_planner REAL NOT NULL, 
         score_ground_truth REAL NOT NULL) 
         """)
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS task_states(
-        id TEXT PRIMARY KEY, 
-        agent_state_id TEXT NOT NULL, 
-        question TEXT NOT NULL, 
-        rewards_id TEXT NOT NULL, 
-        score_id TEXT NOT NULL, 
-        plan TEXT NOT NULL, 
-        solution TEXT NOT NULL, 
-        FOREIGN KEY (rewards_id) REFERENCES reward_states(id),
-        FOREIGN KEY (score_id) REFERENCES score_states(id),
-        FOREIGN KEY (sage_state_id) REFERENCES sage_states(id) ON DELETE CASCADE) 
-        """)
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS sage_states(
     id TEXT PRIMARY KEY, 
@@ -67,6 +55,20 @@ def init_database():
     status TEXT NOT NULL, 
     FOREIGN KEY (parameter_state_id) REFERENCES parameter_states(id))
     """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS task_states(
+        id TEXT PRIMARY KEY, 
+        sage_state_id TEXT NOT NULL, 
+        question TEXT NOT NULL, 
+        rewards_id TEXT NOT NULL, 
+        score_id TEXT NOT NULL, 
+        plan TEXT NOT NULL, 
+        solution TEXT NOT NULL, 
+        FOREIGN KEY (rewards_id) REFERENCES reward_states(id),
+        FOREIGN KEY (score_id) REFERENCES score_states(id),
+        FOREIGN KEY (sage_state_id) REFERENCES sage_states (id) ON DELETE CASCADE) 
+        """)
     conn.commit()
     conn.close()
     logger.info("SQLite database initialized successfully")
@@ -84,7 +86,7 @@ def _save_parameter_state(cursor, param_state: ParameterState):
 def _save_reward_state(cursor, reward_state: RewardState):
     """Helper to save or update a RewardState."""
     cursor.execute(
-        '''INSERT OR REPLACE INTO rewards_states 
+        '''INSERT OR REPLACE INTO reward_states 
            (id, reward_challenger, reward_planner, reward_solver, reward_format, reward_diff) 
            VALUES (?, ?, ?, ?, ?, ?)''',
         (reward_state.id, reward_state.reward_challenger, reward_state.reward_planner,
@@ -100,15 +102,15 @@ def _save_score_state(cursor, score_state: ScoreState):
         (score_state.id, score_state.score_quality, score_state.score_planner, score_state.score_ground_truth)
     )
 
-def _save_tasks_state(cursor, task_state: TasksState, agent_state_id: str):
+def _save_tasks_state(cursor, task_state: TasksState, sage_state_id: str):
     """Helper to save or update a TasksState and its nested states."""
     _save_reward_state(cursor, task_state.rewards)
     _save_score_state(cursor, task_state.score)
     cursor.execute(
-        '''INSERT OR REPLACE INTO tasks_states 
-           (id, agent_state_id, question, rewards_id, score_id, plan, solution) 
+        '''INSERT OR REPLACE INTO task_states 
+           (id, sage_state_id, question, rewards_id, score_id, plan, solution) 
            VALUES (?, ?, ?, ?, ?, ?, ?)''',
-        (task_state.id, agent_state_id, task_state.question, task_state.rewards.id,
+        (task_state.id, sage_state_id, task_state.question, task_state.rewards.id,
          task_state.score.id, task_state.plan, task_state.solution)
     )
 
@@ -119,7 +121,7 @@ def save_agent_state(state: SAGEAgentState):
 
     _save_parameter_state(cursor, state.parameter_state)
 
-    cursor.execute('DELETE FROM tasks_states WHERE agent_state_id = ?', (state.id,))
+    cursor.execute('DELETE FROM task_states WHERE sage_state_id = ?', (state.id,))
     for task in state.tasks:
         _save_tasks_state(cursor, task, state.id)
 
@@ -128,7 +130,7 @@ def save_agent_state(state: SAGEAgentState):
     input_json = json.dumps(state.input)
 
     cursor.execute(
-        '''INSERT OR REPLACE INTO agent_states 
+        '''INSERT OR REPLACE INTO sage_states 
            (id, messages, input, parameter_state_id, status) 
            VALUES (?, ?, ?, ?, ?)''',
         (state.id, messages_json, input_json, state.parameter_state.id, state.status)
@@ -151,7 +153,7 @@ def _load_parameter_state(cursor, param_id: str) -> Optional[ParameterState]:
 
 def _load_reward_state(cursor, reward_id: str) -> Optional[RewardState]:
     """Helper to load a RewardState."""
-    cursor.execute('SELECT * FROM rewards_states WHERE id = ?', (reward_id,))
+    cursor.execute('SELECT * FROM reward_states WHERE id = ?', (reward_id,))
     row = cursor.fetchone()
     if row:
         return RewardState(
@@ -170,10 +172,10 @@ def _load_score_state(cursor, score_id: str) -> Optional[ScoreState]:
         )
     return None
 
-def _load_tasks_states(cursor, agent_state_id: str) -> List[TasksState]:
-    """Helper to load all TasksState instances for a given agent_state_id."""
+def _load_task_states(cursor, sage_state_id: str) -> List[TasksState]:
+    """Helper to load all TasksState instances for a given sage_state_id."""
     tasks = []
-    cursor.execute('SELECT id, question, rewards_id, score_id, plan, solution FROM tasks_states WHERE agent_state_id = ?', (agent_state_id,))
+    cursor.execute('SELECT id, question, rewards_id, score_id, plan, solution FROM task_states WHERE sage_state_id = ?', (sage_state_id,))
     for row in cursor.fetchall():
         task_id, question, rewards_id, score_id, plan, solution = row
         rewards = _load_reward_state(cursor, rewards_id)
@@ -190,7 +192,7 @@ def load_agent_state(state_id: str) -> Optional[SAGEAgentState]:
     conn = sqlite3.connect(DATABASE_FILE)
     cursor = conn.cursor()
 
-    cursor.execute('SELECT id, messages, input, parameter_state_id, status FROM agent_states WHERE id = ?', (state_id,))
+    cursor.execute('SELECT id, messages, input, parameter_state_id, status FROM sage_states WHERE id = ?', (state_id,))
     agent_row = cursor.fetchone()
     conn.close() # Close connection early if no agent state found
 
@@ -204,7 +206,7 @@ def load_agent_state(state_id: str) -> Optional[SAGEAgentState]:
     agent_id, messages_json, input_json, parameter_state_id, status = agent_row
 
     param_state = _load_parameter_state(cursor, parameter_state_id)
-    tasks = _load_tasks_states(cursor, agent_id)
+    tasks = _load_task_states(cursor, agent_id)
 
     conn.close()
 
@@ -225,11 +227,11 @@ def load_agent_state(state_id: str) -> Optional[SAGEAgentState]:
         )
     return None
 
-def list_agent_state_ids() -> List[str]:
+def list_sage_state_ids() -> List[str]:
     """Lists all available agent state IDs in the database."""
     conn = sqlite3.connect(DATABASE_FILE)
     cursor = conn.cursor()
-    cursor.execute('SELECT id FROM agent_states')
+    cursor.execute('SELECT id FROM sage_states')
     ids = [row[0] for row in cursor.fetchall()]
     conn.close()
     return ids
