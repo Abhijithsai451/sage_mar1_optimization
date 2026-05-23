@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 
-from agents.graph_workflow import create_graph
+from agents.graph_workflow import create_smart_graph
 from config.data_config import get_data
 from config.logger_config import sars_logger as logger
 from config.model_config import get_backbone
@@ -31,7 +31,7 @@ def main():
 
     # Creating the Agents and the Workflow
     logger.info("Agents Successfully created")
-    graph = create_graph(llama)
+    graph = create_smart_graph(llama)
     logger.info("Graph Successfully created and workflow visualization saved to agent_workflow.png")
 
     query = ["Add all the 25 numbers from 1 to 25", "Pick a random number between 1 and 25 and multiply by itself."]
