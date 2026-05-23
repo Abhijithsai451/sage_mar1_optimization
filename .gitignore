@@ -32,3 +32,6 @@
 /qwen_model/video_preprocessor_config.json
 /qwen_model/vocab.json
 /logs/
+/.idea/dataSources.xml
+/identifier.sqlite
+/.idea/sqldialects.xml

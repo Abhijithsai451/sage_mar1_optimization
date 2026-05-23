@@ -31,8 +31,7 @@ def challenger(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
                 rewards=RewardState(),
                 score=ScoreState(score_quality="", score_planner="", score_ground_truth=""),
                 plan="",
-                solution=""
-            )
+                solution="")
             )
     state.tasks = state.tasks + tasks
     logger.info("[Challenger]: Updated the state with the new tasks")
