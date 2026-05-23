@@ -1,4 +1,5 @@
 import json
+import os
 import sqlite3
 from typing import List, Optional
 
@@ -10,8 +11,10 @@ from states.parameter_state import ParameterState
 from states.rewards import RewardState
 from states.scores import ScoreState
 from states.tasks_state import TasksState
+from dotenv import load_dotenv
+load_dotenv()
 
-DATABASE_FILE = "sage_states.db"
+DATABASE_FILE = os.getenv("SQLITE_DB_PATH")
 
 def init_database():
     logger.info("Initializing the SQLite database")
@@ -72,6 +75,24 @@ def init_database():
     conn.commit()
     conn.close()
     logger.info("SQLite database initialized successfully")
+
+def clear_db():
+    logger.info("Clearing the database")
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = OFF;")
+    tables = ['task_states', 'reward_states', 'score_states', 'parameter_states', 'sage_states']
+    for table in tables:
+        try:
+            cursor.execute(f"DELETE FROM {table}")
+            logger.info(f"Cleared table: {table}")
+        except sqlite3.OperationalError as e:
+            logger.error(f"Error clearing table {table}: {e}")
+
+    conn.commit()
+    cursor.execute("PRAGMA foreign_keys = ON;")
+    conn.close()
+    logger.info("Database cleared successfully")
 
 def _save_parameter_state(cursor, param_state: ParameterState):
     """Helper to save or update a ParameterState."""
@@ -235,3 +256,7 @@ def list_sage_state_ids() -> List[str]:
     ids = [row[0] for row in cursor.fetchall()]
     conn.close()
     return ids
+
+
+
+
