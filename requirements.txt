@@ -2,9 +2,12 @@ mlx-lm
 mlx
 langgraph
 langchain
+huggingface
+huggingface_hub
 langchain_ollama
 qwen-agent[gui,rag,code_interpreter,mcp]
 transformers>=4.51.0
 datasets
 wandb
 dotenv
+peft
