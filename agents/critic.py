@@ -78,6 +78,6 @@ def critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
             state.tasks[i].score.score_ground_truth = score_question
             state.tasks[i].score.score_planner = score_plans
             state.tasks[i].score.score_quality = score_solutions
-            logger.info("[Critic_Planner]: Updated the state with the Planning Scores")
+    logger.info("[Critic_Planner]: Updated the state with the Planning Scores")
     save_agent_state(state)
     return state

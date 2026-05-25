@@ -35,3 +35,15 @@
 /.idea/dataSources.xml
 /identifier.sqlite
 /.idea/sqldialects.xml
+/model_source/
+/agents/backup.py
+/.idea/data_source_mapping.xml
+/sage_states.db
+/agents/logs/session_20260523_174500.log
+/config/logs/session_20260523_175203.log
+/config/logs/session_20260523_175228.log
+/config/logs/session_20260523_175354.log
+/config/logs/session_20260523_175623.log
+/config/logs/session_20260523_175659.log
+/config/logs/session_20260523_175759.log
+/data/sqlite
