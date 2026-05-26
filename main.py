@@ -6,7 +6,7 @@ from langchain_core.messages import HumanMessage
 from agents.graph_workflow import create_smart_graph
 from config.data_config import get_data
 from config.logger_config import sars_logger as logger
-from config.model_config import get_backbone
+from config.model_config import get_backbone, config_lora
 from config.database_utils import init_database
 from states.agent_state import SAGEAgentState
 
@@ -19,7 +19,7 @@ def main():
     init_database()
     logger.info("[SAGE: Multi Agent Self Evolution for LLM Reasoning]")
     logger.info("Importing the dataset: [GSM8K]")
-    dataset = get_data(data_dir)
+    train_data, test_data = get_data(data_dir)
     logger.info("Importing the dataset: [GSM8K] Completed")
 
     # Importing the Backbone Model

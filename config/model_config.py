@@ -4,10 +4,12 @@ import torch
 from dotenv import load_dotenv
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import LoraConfig, prepare_model_for_kbit_training, get_peft_model
+from config.logger_config import sars_logger as logger
+from states.agent_state import SAGEAgentState
 
 load_dotenv()
 model_name = os.getenv("MODEL_NAME")
-
+model_dir = os.getenv("MODEL_DIR")
 """
 class BackboneModel:
     _instance = None
@@ -43,7 +45,8 @@ def get_backbone():
     return BackboneModel()
 """
 
-def build_model():
+def download_model():
+    logger.info("Downloading the model from HuggingFace Hub")
     hf_hub_download(repo_id=model_name, filename="config.json")
     # huggingface-cli download meta-llama/Llama-3.1-8B-Instruct --local-dir ./model_source --local-dir-use-symlinks False
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -55,6 +58,12 @@ def build_model():
     )
     return model, tokenizer
 
+def load_model():
+    logger.info("Loading the model from the local directory")
+    tokenizer = AutoTokenizer.from_pretrained(model_dir)
+    model = AutoModelForCausalLM.from_pretrained(model_dir, device_map="auto")
+    return model, tokenizer
+
 def config_lora():
     lora_config = LoraConfig(
         r = 8,
@@ -64,14 +73,44 @@ def config_lora():
         bias = "none",
         task_type = "CAUSAL_LM",
     )
-    model, tokenizer = build_model()
+    if not os.path.exists(model_dir):
+        logger.info("Model Directory does not exist. Downloading the model from HuggingFace Hub")
+        model, tokenizer = download_model()
+    else:
+        logger.info("Model Directory exists. Loading the model from the local directory")
+        model, tokenizer = load_model()
+    logger.info("Preparing the model for LoRA training")
     model = prepare_model_for_kbit_training(model)
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
 
     return model, tokenizer
 
-if __name__ == "__main__":
-    model, tokenizer = config_lora()
-    print(model)
+class BackboneModel:
+    _instance = None
 
+    def __new__(cls):
+        if cls._instance is None:
+            logger.info("Initializing the singleton Backbone Model: llama3:8b")
+            cls._instance = super(BackboneModel, cls).__new__(cls)
+            cls._instance.model, cls._instance.tokenizer = config_lora()
+        return cls._instance
+
+    def invoke(self, prompt):
+        #Helper to call the underlying LLM's invoke method
+        return self.model.invoke(prompt)
+
+    def bind_tools(self, tools, **kwargs):
+        return self.model.bind_tools(tools, **kwargs)
+
+    def test_model(self, prompt):
+        response = self.invoke(prompt)
+        return response.content
+
+    def structured_output(self):
+        self.model = self.model.with_structured_output(SAGEAgentState)
+        return self.model
+
+
+def get_backbone():
+    return BackboneModel()
