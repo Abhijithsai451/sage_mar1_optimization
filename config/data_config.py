@@ -7,8 +7,14 @@ def get_data(dir):
         os.makedirs(dir)
         logger.info("Data Directory Created")
     logger.info(f"Loading the dataset to the path {dir} ")
-    dataset = load_dataset(path ="openai/gsm8k",
-                  name = "main",
-                  cache_dir = dir,
-                  )
-    return dataset
+    train_data = load_dataset(path ="openai/gsm8k",
+                              name = "main",
+                              cache_dir = dir,
+                              split = "train[:70%]"
+                              )
+    test_data = load_dataset(path ="openai/gsm8k",
+                             name = "main",
+                             cache_dir = dir,
+                             split = "train[70%:]"
+                             )
+    return train_data, test_data
