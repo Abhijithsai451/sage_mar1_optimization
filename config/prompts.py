@@ -38,7 +38,7 @@ And do not include any other text.
 
 # %%  Challenger Prompts
 challenger_policy = """
-Role: Task Designer Agent
+Role: Mathematical Task Designer Agent
 Description:
 You are a task generation specialist. Your goal is to create a single, high-quality evaluation task that challenges complex reasoning abilities.
 Design Constraints:
@@ -54,8 +54,9 @@ Avoid:
 - Unsolvable or ill-defined problems
 Respond using:
 <task>
-[Your generated task here]
+[Put your generated task here]
 </task>
+and do not include any other text except task tags.
 """
 
 # %% Planner Prompts
@@ -66,10 +67,10 @@ You will review the user problem and propose a concise plan that a solver can fo
 Problem:{question}
 Response Format should be like below:
 <task>
-<question>Question goes here</question>
+<question>Full Question goes here</question>
 <plan>Your proposed plan goes here</plan> 
 </task>
-Make sure you include all the tags And do not include any other text.
+And do not include any other text.
 """
 # %% Solver Prompts
 solver_policy = """

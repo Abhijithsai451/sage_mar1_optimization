@@ -98,14 +98,14 @@ class BackboneModel:
             cls._instance.model,cls._instance.ref_model, cls._instance.tokenizer = config_lora()
         return cls._instance
 
-    def invoke(self, prompt):
+    def _invoke(self, prompt):
         #Helper to call the underlying LLM's invoke method
         return self.model.invoke(prompt)
 
     def bind_tools(self, tools, **kwargs):
         return self.model.bind_tools(tools, **kwargs)
 
-    def test_model(self, prompt):
+    def _test(self, prompt):
         response = self.invoke(prompt)
         return response.content
 
@@ -133,9 +133,8 @@ class BackBone:
             cls._instance.tokenizer.pad_token = cls._instance.tokenizer.eos_token
         return cls._instance
 
-    def invoke(self, messages: list[str])-> AIMessage:
+    def invoke(self, messages)-> AIMessage:
         # Helper to call the underlying LLM's invoke method
-
         prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
         inputs = self.tokenizer(prompt, return_tensors = "pt", padding=True, truncation = True).to(self.device)
@@ -149,8 +148,8 @@ class BackBone:
                 eos_token_id=self.tokenizer.eos_token_id,
                 pad_token_id=self.tokenizer.pad_token_id
             )
-        response__tokens = outputs[0, inputs["input_ids"].shape[1]:]
-        response = self.tokenizer.decode(response__tokens, skip_special_tokens=True)
+        response_tokens = outputs[0, inputs["input_ids"].shape[1]:]
+        response = self.tokenizer.decode(response_tokens, skip_special_tokens=True)
         return AIMessage(content=response)
     def bind_tools(self, tools, **kwargs):
         return self.model.bind_tools(tools, **kwargs)

@@ -2,7 +2,7 @@ import re
 from langchain_core.messages import SystemMessage, HumanMessage
 from config import prompts
 from config.logger_config import sars_logger as logger
-from config.model_config import BackboneModel
+from config.model_config import BackboneModel, BackBone
 from config.database_utils import save_agent_state
 from states.agent_state import SAGEAgentState
 from states.rewards import RewardState
@@ -10,15 +10,17 @@ from states.scores import ScoreState
 from states.tasks_state import TasksState
 
 
-def challenger(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
+def challenger(state: SAGEAgentState, model: BackBone) -> SAGEAgentState:
     logger.info("[Challenger]: Initiating the Challenger Agent")
     user_content = f"Dataset Reference Examples: \n {state.input} \n\nPlease generate a set of 5 new tasks following the reference style."
     messages = [
         {"role": "system", "content": prompts.challenger_policy},
         {"role": "user", "content": user_content}
     ]
+
     response = model.invoke(messages)
     content = response.content
+    print(content)
     logger.info("[Challenger]: Challenger Agent created the Response ")
     content = re.findall(r"<task>(.*?)</task>", content, re.DOTALL)
     tasks = []
@@ -33,7 +35,9 @@ def challenger(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
                 plan="",
                 solution="")
             )
+    print("tasks: ", tasks)
     state.tasks = state.tasks + tasks
+    print("state.tasks: ", state.tasks)
     logger.info("[Challenger]: Updated the state with the new tasks")
     state.status = "challenged"
     save_agent_state(state)

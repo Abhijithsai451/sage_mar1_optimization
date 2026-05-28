@@ -7,7 +7,7 @@ from agents.graph_workflow import create_smart_graph
 from config.data_config import get_data
 from config.logger_config import sars_logger as logger
 from config.model_config import get_backbone, config_lora, get_basemodel
-from config.database_utils import init_database
+from config.database_utils import init_database, clear_db
 from config.trainer import SAGETrainer, training_args
 from states.agent_state import SAGEAgentState
 
@@ -17,6 +17,7 @@ greeting = os.getenv("GREETING")
 
 
 def test():
+    clear_db()
     init_database()
     logger.info("[SAGE: Multi Agent Self Evolution for LLM Reasoning]")
     logger.info("Importing the dataset: [GSM8K]")
