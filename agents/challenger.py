@@ -14,8 +14,8 @@ def challenger(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     logger.info("[Challenger]: Initiating the Challenger Agent")
     user_content = f"Dataset Reference Examples: \n {state.input} \n\nPlease generate a set of 5 new tasks following the reference style."
     messages = [
-        SystemMessage(content=prompts.challenger_policy),
-        HumanMessage(content=user_content)
+        {"role": "system", "content": prompts.challenger_policy},
+        {"role": "user", "content": user_content}
     ]
     response = model.invoke(messages)
     content = response.content

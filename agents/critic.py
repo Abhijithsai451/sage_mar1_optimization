@@ -12,8 +12,8 @@ def critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     tasks = state.tasks
     tasks = str(tasks)
     messages = [
-        SystemMessage(content=critic_prompt),
-        HumanMessage(content=user_content + tasks)
+        {"role": "system", "content": critic_prompt},
+        {"role": "user", "content": user_content + tasks}
     ]
     response = model.invoke(messages)
     print(response.content)
