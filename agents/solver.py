@@ -15,8 +15,8 @@ def solver(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     plans = "\n\n".join(
         [f"Plan {i + 1}:\n{task_item.question} + \n{task_item.plan}" for i, task_item in enumerate(state.tasks)])
     messages = [
-        SystemMessage(content=prompts.solver_policy),
-        HumanMessage(content=user_content + plans)
+        {"role": "system","content":prompts.solver_policy},
+        {"role": "user","content":user_content + plans}
     ]
     response = model.invoke(messages)
     logger.info("[Solver]: Created the Solutions for every question ")

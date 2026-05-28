@@ -14,7 +14,8 @@ training_args = transformers.TrainingArguments(
     output_dir="lora_output",
     optim="paged_adamw_8bit",
     report_to="none",
-    num_train_epochs=4
+    num_train_epochs=4,
+    remove_unused_columns=False,
     )
 
 
@@ -29,13 +30,7 @@ class SAGETrainer(Trainer):
 
     def compute_loss(self, model, inputs, return_outputs=False):
         """
-            Custom training loop implementation for REINFORCE++ with LoRA.
-            Expects inputs to contain:
-                - input_ids: prompt + response tokens
-                - attention_mask
-                - labels: response tokens to compute loss on (-100 for prompts)
-                - rewards: response-level scalar rewards (shape: [batch_size])
-                - old_log_probs: token log probs from the generation phase (shape: [batch_size, seq_len])
+        REINFORCE ++ Loss Calculation using the unified LoRA Model and the base fine-tuned model (ref_model)
         """
         # Forward Pass through the model
         outputs = model(

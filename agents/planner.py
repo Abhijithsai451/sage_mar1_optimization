@@ -12,8 +12,8 @@ def planner(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     user_content = f"For every question in the list. Please generate a concise plan for to solve the question."
     questions = "\n\n".join([f"question {i + 1}:\n{task_item.question}" for i, task_item in enumerate(state.tasks)])
     messages = [
-        SystemMessage(content=prompts.planner_policy),
-        HumanMessage(content=user_content + questions)
+        {"role":"system", "content":prompts.planner_policy},
+        {"role":"user", "content":user_content + questions}
     ]
     response = model.invoke(messages)
     logger.info("[Planner]: Created the Plans for every question ")
