@@ -2,11 +2,11 @@ from langchain_core.messages import HumanMessage, SystemMessage
 import re
 from config.database_utils import save_agent_state
 from config.logger_config import sars_logger as logger
-from config.model_config import BackboneModel
+from config.model_config import BackboneModel, BackBone
 from config.prompts import critic_prompt
 from states.agent_state import SAGEAgentState
 
-def critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
+def critic(state: SAGEAgentState, model: BackBone) -> SAGEAgentState:
     logger.info(f"[Critic_Challenger]: Initiated the Critic Agent and Evaluating the Questions, Plan and Solutions")
     user_content = f"evaluate each task in the list and provide a score between 1-10 for each task as per the criteria"
     tasks = state.tasks
