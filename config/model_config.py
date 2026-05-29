@@ -1,4 +1,6 @@
 import os
+from typing import List, Dict
+
 from huggingface_hub import hf_hub_download
 import torch
 from dotenv import load_dotenv
@@ -133,7 +135,7 @@ class BackBone:
             cls._instance.tokenizer.pad_token = cls._instance.tokenizer.eos_token
         return cls._instance
 
-    def invoke(self, messages)-> AIMessage:
+    def invoke(self, messages: List[Dict[str, str]])-> AIMessage:
         # Helper to call the underlying LLM's invoke method
         prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
@@ -141,7 +143,7 @@ class BackBone:
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
-                max_new_tokens=512,
+                max_new_tokens=50000,
                 do_sample=True,
                 temperature=0.7,
                 top_p=0.9,
