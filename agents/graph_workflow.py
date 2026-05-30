@@ -6,6 +6,7 @@ from agents.critic import critic as critic_node
 from agents.planner import planner as planner_node
 from agents.solver import solver as solver_node
 from config.logger_config import sars_logger as logger
+from config.model_config import get_backbone
 from states.agent_state import SAGEAgentState
 
 def save_graph_image(app, filename="agent_workflow.png"):
@@ -48,12 +49,13 @@ def create_graph(llm_instance):
     return graph
 """
 
-def create_smart_graph(llm_instance):
+def create_graph():
+    llm_instance = get_backbone()
     graph = StateGraph(SAGEAgentState)
-    challenger = partial(challenger_node, model=llm_instance)
-    planner = partial(planner_node, model=llm_instance)
-    solver = partial(solver_node, model=llm_instance)
-    critic = partial(critic_node, model=llm_instance)
+    challenger = partial(challenger_node, model=llm_instance, lora_name="challenger")
+    planner = partial(planner_node, model=llm_instance, lora_name="planner")
+    solver = partial(solver_node, model=llm_instance, lora_name="solver")
+    critic = partial(critic_node, model=llm_instance, lora_name="critic")
 
     graph.add_node("challenger", challenger)
     graph.add_node("planner", planner)

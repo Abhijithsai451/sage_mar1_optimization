@@ -1,12 +1,12 @@
 import os
 from config import prompts
 from config.logger_config import sars_logger as logger
-from config.model_config import BackBone
+from config.model_config import BackboneModel
 from config.database_utils import save_agent_state
 from states.agent_state import SAGEAgentState
 
 
-def solver(state: SAGEAgentState, model: BackBone) -> SAGEAgentState:
+def solver(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     logger.info("[Solver]: Initiating the Solver Agent")
     user_content = f"For every question and plan in the list. Please generate a detailed solution for the question."
     plans = "\n\n".join(

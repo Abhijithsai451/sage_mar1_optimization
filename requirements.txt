@@ -1,16 +1,13 @@
-mlx-lm
-mlx
-llama-cpp-python
 langgraph
 langchain
-huggingface
-huggingface_hub
 langchain_ollama
-qwen-agent[gui,rag,code_interpreter,mcp]
 torch
 torchvision
-torchaudio
 datasets
 wandb
 dotenv
 peft
+trl
+# VLLM settings
+#curl -fsSL https://raw.githubusercontent.com/vllm-project/vllm-metal/main/install.sh | bash
+#source ~/.venv-vllm-metal/bin/activate
