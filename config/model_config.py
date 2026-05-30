@@ -1,4 +1,6 @@
 import os
+from typing import List, Dict
+
 from huggingface_hub import hf_hub_download
 import torch
 from dotenv import load_dotenv
@@ -11,7 +13,46 @@ from states.agent_state import SAGEAgentState
 load_dotenv()
 model_name = os.getenv("MODEL_NAME")
 model_dir = os.getenv("MODEL_DIR")
-"""
+
+def download_model():
+    logger.info("Downloading the model from HuggingFace Hub")
+    hf_hub_download(repo_id=model_name, filename="config.json")
+    # hf download TinyLlama/TinyLlama-1.1B-Chat-v1.0 --exclude "originals/*"--local-dir ./base_model
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        load_in_4bit=True,
+        dtype=torch.bfloat16,
+        device_map="auto",
+    )
+    model.requires_grad_(False)
+    #return model, tokenizer
+
+def load_model():
+    if not os.path.exists(model_dir) or not os.listdir(model_dir):
+        logger.info("Model Directory does not Exists")
+        download_model()
+    else:
+        logger.info("Model Directory Exists")
+    logger.info("Loading the model from the local directory")
+    tokenizer = AutoTokenizer.from_pretrained(model_dir)
+    model = AutoModelForCausalLM.from_pretrained(model_dir,
+                                                 load_in_4bit=True,
+                                                 dtype = torch.bfloat16,
+                                                 device_map="auto")
+    return model, tokenizer
+
+def config_lora():
+    lora_config = LoraConfig(
+        r = 8,
+        lora_alpha = 16,
+        target_modules = ["q_proj","k_project","v_proj","o_proj"],
+        lora_dropout = 0.05,
+        bias = "none",
+        task_type = "CAUSAL_LM",
+    )
+    return lora_config
+
 class BackboneModel:
     _instance = None
 
@@ -19,11 +60,7 @@ class BackboneModel:
         if cls._instance is None:
             logger.info("Initializing the singleton Backbone Model: llama3:8b")
             cls._instance = super(BackboneModel, cls).__new__(cls)
-            cls._instance.model = ChatOllama(
-                model="llama3.1:8b",
-                temperature=0,
-                base_url="http://localhost:11434"
-            )
+            cls._instance.model,cls._instance.tokenizer = load_model()
         return cls._instance
 
     def invoke(self, prompt):
@@ -44,51 +81,10 @@ class BackboneModel:
 
 def get_backbone():
     return BackboneModel()
-"""
 
-def download_model():
-    logger.info("Downloading the model from HuggingFace Hub")
-    hf_hub_download(repo_id=model_name, filename="config.json")
-    # huggingface-cli download meta-llama/Llama-3.1-8B-Instruct --local-dir ./model_source --local-dir-use-symlinks False
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    ref_model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        load_in_4bit=True,
-        torch_dtype=torch.bfloat16,
-        device_map="auto",
-    )
-    ref_model.requires_grad_(False)
-    return ref_model, tokenizer
 
-def load_model():
-    logger.info("Loading the model from the local directory")
-    tokenizer = AutoTokenizer.from_pretrained(model_dir)
-    model = AutoModelForCausalLM.from_pretrained(model_dir, device_map="auto")
-    return model, tokenizer
 
-def config_lora():
-    lora_config = LoraConfig(
-        r = 8,
-        lora_alpha = 16,
-        target_modules = ["q_proj","k_project","v_proj","o_proj"],
-        lora_dropout = 0.05,
-        bias = "none",
-        task_type = "CAUSAL_LM",
-    )
-    if not os.path.exists(model_dir):
-        logger.info("Model Directory does not exist. Downloading the model from HuggingFace Hub")
-        ref_model, tokenizer = download_model()
-    else:
-        logger.info("Model Directory exists. Loading the model from the local directory")
-        ref_model, tokenizer = load_model()
-    logger.info("Preparing the model for LoRA training")
-    model = prepare_model_for_kbit_training(ref_model)
-    model = get_peft_model(ref_model, lora_config)
-    model.print_trainable_parameters()
-
-    return model, ref_model, tokenizer
-
-class BackboneModel:
+"""class BackboneModel:
     _instance = None
 
     def __new__(cls):
@@ -133,7 +129,7 @@ class BackBone:
             cls._instance.tokenizer.pad_token = cls._instance.tokenizer.eos_token
         return cls._instance
 
-    def invoke(self, messages)-> AIMessage:
+    def invoke(self, messages: List[Dict[str, str]])-> AIMessage:
         # Helper to call the underlying LLM's invoke method
         prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
@@ -141,7 +137,7 @@ class BackBone:
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
-                max_new_tokens=512,
+                max_new_tokens=50000,
                 do_sample=True,
                 temperature=0.7,
                 top_p=0.9,
@@ -166,4 +162,5 @@ class BackBone:
 
 
 def get_basemodel():
-    return BackBone()
+ return BackBone()
+"""

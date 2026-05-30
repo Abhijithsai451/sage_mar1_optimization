@@ -2,12 +2,12 @@ import re
 from langchain_core.messages import SystemMessage, HumanMessage
 from config import prompts
 from config.logger_config import sars_logger as logger
-from config.model_config import BackboneModel, BackBone
+from config.model_config import BackboneModel
 from config.database_utils import save_agent_state
 from states.agent_state import SAGEAgentState
 
 
-def planner(state: SAGEAgentState, model: BackBone) -> SAGEAgentState:
+def planner(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
     logger.info("[Planner]: Initiating the Planner Agent")
     print(state.tasks)
     user_content = f"For every question in the list. Please generate a concise plan for to solve the question."

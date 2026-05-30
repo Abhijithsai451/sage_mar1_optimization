@@ -52,7 +52,17 @@ Avoid:
 - Ambiguous success criteria
 - Web-dependent or time-sensitive content
 - Unsolvable or ill-defined problems
-Respond using:
+- Avoid answering in simple text but strictly follow the output format 
+Example:
+Input:
+Dataset Reference Examples:
+- "Add all the 25 numbers from 1 to 25"
+- "Pick a random number between 1 and 25 and multiply by itself."
+Output:
+<task>
+A train travels at 60 mph for 2 hours, then slows down to 40 mph for another 3 hours. How far did the train travel in total?
+</task>
+Important: Strictly Format your response in as follow.
 <task>
 [Put your generated task here]
 </task>
@@ -65,9 +75,9 @@ Role: Planner Agent
 Description:
 You will review the user problem and propose a concise plan that a solver can follow.
 Problem:{question}
-Response Format should be like below:
+Respond using:
 <task>
-<question>Full Question goes here</question>
+<question>Put your question here</question>
 <plan>Your proposed plan goes here</plan> 
 </task>
 And do not include any other text.
