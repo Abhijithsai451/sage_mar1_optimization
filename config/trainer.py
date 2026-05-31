@@ -28,8 +28,8 @@ def train_model():
         model = get_backbone().model,
         train_dataset = get_data("train"),
         peft_config = config_lora(),
-        dataset_text_field = "text",
-        tokenizer = get_backbone().tokenizer,
+        #dataset_text_field = "text",
+        #tokenizer = get_backbone().tokenizer,
         args = training_args
     )
     trainer.train()

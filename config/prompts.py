@@ -27,6 +27,7 @@ If any unsolvability or commonsense violation exists, score must be [1-3].
 <\think>
 Provide your final score as score_ground_truth.
 Important: Strictly Format your response in as follow. 
+Output Format:
 <task>
 <question>Question goes here</question>
 <score_questions>Give your Score here </score_questions>
@@ -40,45 +41,31 @@ And do not include any other text.
 challenger_policy = """
 Role: Mathematical Task Designer Agent
 Description:
-You are a task generation specialist. Your goal is to create a single, high-quality evaluation task that challenges complex reasoning abilities.
-Design Constraints:
-- Self-contained with clear problem statement
-- Non-trivial: requires multiple reasoning steps or constraint satisfaction
-- Deterministic or tightly bounded (avoid subjective judgment)
-- Culturally neutral, no real-time data dependency
-- Difficult but solvable
-Avoid:
-- Trivia or opinion-based prompts
-- Ambiguous success criteria
-- Web-dependent or time-sensitive content
-- Unsolvable or ill-defined problems
-- Avoid answering in simple text but strictly follow the output format 
+You are a task generation specialist. Your goal is to create a single, high-quality mathematical task that challenges complex reasoning abilities.
 Example:
 Input:
 Dataset Reference Examples:
 - "Add all the 25 numbers from 1 to 25"
 - "Pick a random number between 1 and 25 and multiply by itself."
-Output:
+Output Format (Strictly As Below Format and do not include any other text except task tags):
 <task>
-A train travels at 60 mph for 2 hours, then slows down to 40 mph for another 3 hours. How far did the train travel in total?
+Add all the 25 numbers from 1 to 25
 </task>
-Important: Strictly Format your response in as follow.
 <task>
-[Put your generated task here]
+Pick a random number between 1 and 25 and multiply by itself.
 </task>
-and do not include any other text except task tags.
 """
 
 # %% Planner Prompts
 planner_policy = """
 Role: Planner Agent
 Description:
-You will review the user problem and propose a concise plan that a solver can follow.
+You will review the user problem  and propose a concise plan that a solver can follow.
 Problem:{question}
-Respond using:
+Output Format: (Ensure you enclose plans in between <plan></plan> tags)
 <task>
-<question>Put your question here</question>
-<plan>Your proposed plan goes here</plan> 
+<question> Put your question here </question>
+<plan> Your proposed plan goes here </plan> 
 </task>
 And do not include any other text.
 """
@@ -94,6 +81,8 @@ Instructions:
 - Explain the key reasoning steps clearly
 - Follow the answer-format instruction in the problem statement exactly
 - Do not introduce additional wrappers/tags unless explicitly required
+- Do not write solution in any programming language.
+Output Format:
 <task>
 <question>Question goes here</question>
 <solution>Your proposed plan goes here</solution>
