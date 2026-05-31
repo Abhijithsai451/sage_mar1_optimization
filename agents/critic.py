@@ -32,7 +32,6 @@ def critic(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> SAGEA
         score_solutions = re.search(r"<score_solutions>(.*?)</score_solutions>", scores_block, re.DOTALL)
         score_solutions = score_solutions.group(1).strip()
         scores.append({"question": question, "score_question": score_question, "score_plans": score_plans, "score_solutions": score_solutions})
-    print(scores)
     logger.info("[Critic_Planner]: Extracted the Plan Scores and creating the state objects")
     for i in range(len(scores)):
         question = scores[i].get("question")

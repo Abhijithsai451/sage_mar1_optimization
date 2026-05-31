@@ -78,14 +78,19 @@ Input:
 - Problem: {question}
 - Verified Plan: {plan}
 Instructions:
+- give solution in only 5 steps max
 - Explain the key reasoning steps clearly
 - Follow the answer-format instruction in the problem statement exactly
 - Do not introduce additional wrappers/tags unless explicitly required
 - Do not write solution in any programming language.
 Output Format:
 <task>
-<question>Question goes here</question>
-<solution>Your proposed plan goes here</solution>
+<question>Question1 goes here</question>
+<solution>Your proposed plan to the above question1 goes here</solution>
+</task>
+<task>
+<question>Question2  goes here</question>
+<solution>Your proposed plan to the above question2 goes here</solution>
 </task>
 And do not include any other text.
 """

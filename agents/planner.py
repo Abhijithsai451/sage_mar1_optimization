@@ -9,7 +9,6 @@ from states.agent_state import SAGEAgentState
 
 def planner(state: SAGEAgentState, model: BackboneModel,  lora_name: str) -> SAGEAgentState:
     logger.info("[Planner]: Initiating the Planner Agent")
-    print(state.tasks)
     user_content = f"For every question in the list. Please generate a concise plan for to solve the question."
     questions = "\n\n".join([f"question {i + 1}:\n{task_item.question}" for i, task_item in enumerate(state.tasks)])
     messages = [
@@ -26,7 +25,6 @@ def planner(state: SAGEAgentState, model: BackboneModel,  lora_name: str) -> SAG
         raise
     plan_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
     plans = []
-    print(plan_blocks)
     logger.info("[Planner]: Extracting the tasks from the response and creating the state objects")
     for plan_block in plan_blocks:
         question_tags = re.search(r"<question>(.*?)</question>", plan_block, re.DOTALL)

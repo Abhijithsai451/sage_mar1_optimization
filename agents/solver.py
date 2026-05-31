@@ -21,7 +21,6 @@ def solver(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> SAGEA
     ]
     lora_model = model.with_config(configurable={"model": lora_name})
     response = lora_model.invoke(messages)
-    print(response.content)
     logger.info("[Solver]: Created the Solutions for every question ")
     task_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
     tasks = []
@@ -39,7 +38,6 @@ def solver(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> SAGEA
         solution = tasks[i].get("solution")
         if question == state.tasks[i].question:
             state.tasks[i].solution = solution
-    print(state.tasks)
     logger.info("[Solver]: Updated the state with the new solutions")
     state.status = "solved"
     logger.info(f"[Solver]: Updated the state with the new status {state.status}")
