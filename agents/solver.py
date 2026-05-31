@@ -1,4 +1,8 @@
 import os
+import re
+
+from langchain_core.messages import SystemMessage, HumanMessage
+
 from config import prompts
 from config.logger_config import sars_logger as logger
 from config.model_config import BackboneModel
@@ -6,16 +10,17 @@ from config.database_utils import save_agent_state
 from states.agent_state import SAGEAgentState
 
 
-def solver(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
+def solver(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> SAGEAgentState:
     logger.info("[Solver]: Initiating the Solver Agent")
     user_content = f"For every question and plan in the list. Please generate a detailed solution for the question."
     plans = "\n\n".join(
         [f"Plan {i + 1}:\n{task_item.question} + \n{task_item.plan}" for i, task_item in enumerate(state.tasks)])
     messages = [
-        {"role": "system","content":prompts.solver_policy},
-        {"role": "user","content":user_content + plans}
+        SystemMessage(content=prompts.solver_policy),
+        HumanMessage(content=user_content + plans)
     ]
-    response = model.invoke(messages)
+    lora_model = model.with_config(configurable={"model": lora_name})
+    response = lora_model.invoke(messages)
     print(response.content)
     logger.info("[Solver]: Created the Solutions for every question ")
     task_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)

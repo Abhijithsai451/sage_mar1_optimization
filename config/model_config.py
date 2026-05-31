@@ -1,23 +1,20 @@
 import os
-from typing import List, Dict
-
 from huggingface_hub import hf_hub_download
 import torch
 from dotenv import load_dotenv
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from peft import LoraConfig, prepare_model_for_kbit_training, get_peft_model
+from peft import LoraConfig
 from config.logger_config import sars_logger as logger
 from states.agent_state import SAGEAgentState
-
+from langchain_openai import ChatOpenAI
 load_dotenv()
 model_name = os.getenv("MODEL_NAME")
 model_dir = os.getenv("MODEL_DIR")
-
+model_url = os.getenv("MODEL_URL")
 def download_model():
     logger.info("Downloading the model from HuggingFace Hub")
     hf_hub_download(repo_id=model_name, filename="config.json")
-    # hf download TinyLlama/TinyLlama-1.1B-Chat-v1.0 --exclude "originals/*"--local-dir ./base_model
+    # hf download meta-llama/Llama-3.2-3B-Instruct --exclude "originals/*" --local-dir ./base_model
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
@@ -60,15 +57,22 @@ class BackboneModel:
         if cls._instance is None:
             logger.info("Initializing the singleton Backbone Model: llama3:8b")
             cls._instance = super(BackboneModel, cls).__new__(cls)
-            cls._instance.model,cls._instance.tokenizer = load_model()
+            cls._instance.model = ChatOpenAI(
+                model=model_dir,
+                base_url=model_url,
+                api_key = "EMPTY",
+                temperature = 0.7,
+            )
         return cls._instance
 
     def invoke(self, prompt):
-        #Helper to call the underlying LLM's invoke method
         return self.model.invoke(prompt)
 
     def bind_tools(self, tools, **kwargs):
         return self.model.bind_tools(tools, **kwargs)
+
+    def with_config(self, configurable: dict):
+        return self.model.with_config(configurable)
 
     def test_model(self, prompt):
         response = self.invoke(prompt)

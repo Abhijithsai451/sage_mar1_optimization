@@ -28,7 +28,7 @@ def test():
     logger.info("Creating the backbone model: [llama3:8b]")
     model = get_backbone()
     response = model.test_model(greeting)
-    logger.info("Backbone model Successfully created: [llama3:8b]:")
+    logger.info("Backbone model Successfully created: [TinyLlama:1.1b]:")
     print(f"Model-> {response}")
 
     # Creating the Agents and the Workflow
@@ -38,7 +38,7 @@ def test():
 
     query = ["Add all the 25 numbers from 1 to 25", "Pick a random number between 1 and 25 and multiply by itself."]
     # Training Loop comes here.
-    """ 
+
     messages = [HumanMessage(content=f"Generate 3 different mathematical tasks similar to the {query}")]
     initial_state = SAGEAgentState(
         messages=messages,
@@ -53,8 +53,8 @@ def test():
             print(task)
     else:
         print("\nNo tasks generated or found in the final graph state ")
-    """
-    response = train_model()
+
+    #response = train_model()
     print(response)
 
 if __name__ == "__main__":

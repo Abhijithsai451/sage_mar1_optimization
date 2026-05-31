@@ -6,16 +6,17 @@ from config.model_config import BackboneModel
 from config.prompts import critic_prompt
 from states.agent_state import SAGEAgentState
 
-def critic(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
+def critic(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> SAGEAgentState:
     logger.info(f"[Critic_Challenger]: Initiated the Critic Agent and Evaluating the Questions, Plan and Solutions")
     user_content = f"evaluate each task in the list and provide a score between 1-10 for each task as per the criteria"
     tasks = state.tasks
     tasks = str(tasks)
     messages = [
-        {"role": "system", "content": critic_prompt},
-        {"role": "user", "content": user_content + tasks}
+        SystemMessage(content=critic_prompt),
+        HumanMessage(content=user_content + tasks)
     ]
-    response = model.invoke(messages)
+    lora_model = model.with_config(configurable={"model": lora_name})
+    response = lora_model.invoke(messages)
     print(response.content)
     logger.info("[Critic_Planner]: Critic Agent created the Scores for the Plans ")
     scores_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)

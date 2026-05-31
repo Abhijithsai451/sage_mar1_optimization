@@ -7,17 +7,18 @@ from config.database_utils import save_agent_state
 from states.agent_state import SAGEAgentState
 
 
-def planner(state: SAGEAgentState, model: BackboneModel) -> SAGEAgentState:
+def planner(state: SAGEAgentState, model: BackboneModel,  lora_name: str) -> SAGEAgentState:
     logger.info("[Planner]: Initiating the Planner Agent")
     print(state.tasks)
     user_content = f"For every question in the list. Please generate a concise plan for to solve the question."
     questions = "\n\n".join([f"question {i + 1}:\n{task_item.question}" for i, task_item in enumerate(state.tasks)])
     messages = [
-        {"role":"system", "content":prompts.planner_policy},
-        {"role":"user", "content":user_content + questions}
+        SystemMessage(content=prompts.planner_policy),
+        HumanMessage(content=user_content + questions)
     ]
+    lora_model = model.with_config(configurable={"model": lora_name})
     try:
-        response = model.invoke(messages)
+        response = lora_model.invoke(messages)
         print(response.content)
         logger.info("[Planner]: Created the Plans for every question ")
     except Exception as e:
