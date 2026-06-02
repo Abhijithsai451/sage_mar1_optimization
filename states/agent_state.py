@@ -14,4 +14,3 @@ class SAGEAgentState(BaseModel):
     input: List[str]
     parameter_state: ParameterState = Field(default_factory=ParameterState)
     tasks: List[TasksState] = Field(default_factory=list)
-    status: Literal["Initialized", "challenged", "planned", "solved"]

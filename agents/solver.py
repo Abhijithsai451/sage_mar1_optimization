@@ -7,6 +7,7 @@ from config import prompts
 from config.logger_config import sars_logger as logger
 from config.model_config import BackboneModel
 from config.database_utils import save_agent_state
+from config.prompts import solver_policy
 from states.agent_state import SAGEAgentState
 
 
@@ -16,7 +17,7 @@ def solver(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> SAGEA
     plans = "\n\n".join(
         [f"Plan {i + 1}:\n{task_item.question} + \n{task_item.plan}" for i, task_item in enumerate(state.tasks)])
     messages = [
-        SystemMessage(content=prompts.solver_policy),
+        SystemMessage(content= solver_policy),
         HumanMessage(content=user_content + plans)
     ]
     lora_model = model.with_config(configurable={"model": lora_name})
@@ -39,7 +40,5 @@ def solver(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> SAGEA
         if question == state.tasks[i].question:
             state.tasks[i].solution = solution
     logger.info("[Solver]: Updated the state with the new solutions")
-    state.status = "solved"
-    logger.info(f"[Solver]: Updated the state with the new status {state.status}")
     save_agent_state(state)
     return state

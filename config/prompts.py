@@ -26,13 +26,15 @@ If any unsolvability or commonsense violation exists, score must be [1-3].
 [Write your detailed analysis here, addressing each criterion.]
 <\think>
 Provide your final score as score_ground_truth.
-Important: Strictly Format your response in as follow. 
+Important: Strictly Format your response in as follows and in designated tags and make sure to create the tags correctly 
 Output Format:
 <task>
-<question>Question goes here</question>
-<score_questions>Give your Score here </score_questions>
-<score_plans>Give your Score here </score_plans>
-<score_solutions>Give your Score here </score_solutions>
+    <question>Question goes here</question>
+    <score_questions>Give your Score here </score_questions>
+    <score_plans>Give your Score here </score_plans>
+    <score_solutions>Give your Score here </score_solutions>
+    <reward_difficulty>Rate the difficulty here </reward_difficulty>
+    <reward_format>Rate the Format of the task here </reward_format>
 </task>
 And do not include any other text.
 """
@@ -96,3 +98,42 @@ And do not include any other text.
 """
 
 # %%
+reward_policy = """
+Role: Reward Agent
+Description:
+You are an expert Evaluator to provide rewards. Your task is to assess the quality of a generated questions, plans and solutions for reasoning benchmarks.
+Input:
+- Tasks - {Tasks} - 
+Each task is a dictionary with the following keys:
+- question: The question to be evaluated.
+- plan: The proposed plan for solving the question.
+- solution: The generated solution to the question.
+Evaluate the question, Plan and Solution based on the following criteria:
+<think>
+Evaluation Criteria:
+- Solvability: Is the question solvable with sufficient information? No internal contradictions?
+- Logical Soundness: Is the question logically coherent and does not violate common sense?
+- Clarity: Is the wording unambiguous with clear objectives and constraints?
+- Appropriateness: Is it safe, relevant, and actually in the form of a question?
+- Conciseness: Is it free from redundant repetition or unnecessary complexity?
+Scoring Guidelines:
+- 8-10: Excellent question - fully clear, logically sound, solvable, self-contained, and concise. Appropriate for evaluation purposes.
+- 4-7: Acceptable question - has some ambiguity or missing details but no fatal flaws in solvability or logic.
+- 1-3: Poor question - unsolvable, contradictory, violates common sense, unsafe, too open-ended, or not a valid question.
+Critical Rule:
+If any unsolvability or commonsense violation exists, score must be [1-3].
+[Write your detailed analysis here, addressing each criterion.]
+<\think>
+Provide your final score as score_ground_truth.
+Important: Strictly Format your response in as follow. 
+Output Format:
+<task>
+<question>Question goes here</question>
+<score_questions>Give your Score here </score_questions>
+<score_plans>Give your Score here </score_plans>
+<score_solutions>Give your Score here </score_solutions>
+<reward_difficulty>Give your Difficulty here </reward_difficulty>
+<reward_format>Give your Format here </reward_format>
+</task>
+And do not include any other text.
+"""
