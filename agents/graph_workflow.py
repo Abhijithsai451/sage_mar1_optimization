@@ -1,11 +1,11 @@
 from functools import partial
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
-from agents.challenger import challenger as challenger_node
-from agents.critic import critic as critic_node
-from agents.planner import planner as planner_node
+from agents.challenger import challenger_test as challenger_node
+from agents.critic import critic_test as critic_node
+from agents.planner import planner_test as planner_node
 from agents.reward import reward_agent
-from agents.solver import solver as solver_node
+from agents.solver import solver_test as solver_node
 from config.logger_config import sars_logger as logger
 from config.model_config import get_backbone
 from states.agent_state import SAGEAgentState
@@ -22,13 +22,38 @@ def save_graph_image(app, filename="agent_workflow.png"):
         logger.info("\nMermaid Diagram String:")
         logger.info(app.get_graph().draw_mermaid())
 
-def create_graph():
+"""def create_graph():
     llm_instance = get_backbone()
     graph = StateGraph(SAGEAgentState)
     challenger = partial(challenger_node, model=llm_instance, lora_name="challenger")
     planner = partial(planner_node, model=llm_instance, lora_name="planner")
     solver = partial(solver_node, model=llm_instance, lora_name="solver")
     critic = partial(critic_node, model=llm_instance, lora_name="critic")
+
+    graph.add_node("challenger", challenger)
+    graph.add_node("planner", planner)
+    graph.add_node("solver", solver)
+    graph.add_node("critic", critic)
+    graph.add_node("reward", reward_agent)
+
+    graph.add_edge(START, "challenger")
+    graph.add_edge("challenger", "planner")
+    graph.add_edge("planner","solver")
+    graph.add_edge("solver","critic")
+    graph.add_edge("critic","reward")
+    graph.add_edge("reward", END)
+
+    graph = graph.compile()
+    save_graph_image(graph, filename="agent_workflow.png")
+    return graph"""
+
+def create_graph():
+    llm_instance = get_backbone()
+    graph = StateGraph(SAGEAgentState)
+    challenger = partial(challenger_node, model=llm_instance)
+    planner = partial(planner_node, model=llm_instance)
+    solver = partial(solver_node, model=llm_instance)
+    critic = partial(critic_node, model=llm_instance)
 
     graph.add_node("challenger", challenger)
     graph.add_node("planner", planner)

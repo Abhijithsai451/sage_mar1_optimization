@@ -11,3 +11,4 @@
 /config/logs/
 /data/sqlite
 /base_model/
+/wandb/

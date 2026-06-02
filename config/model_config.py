@@ -71,6 +71,9 @@ class BackboneModel:
     def bind_tools(self, tools, **kwargs):
         return self.model.bind_tools(tools, **kwargs)
 
+    def parameters(self):
+        return self.model.__parameters__()
+
     def with_config(self, configurable: dict):
         return self.model.with_config(configurable)
 

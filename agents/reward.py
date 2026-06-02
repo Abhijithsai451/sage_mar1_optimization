@@ -16,6 +16,4 @@ def reward_agent(state: SAGEAgentState) -> SAGEAgentState:
         task.rewards.reward_solver = (parameters.w_p * task.score.score_planner + parameters.w_c * task.score.score_ground_truth
                                         + parameters.w_f * task.rewards.reward_format)
 
-
-    print(state.tasks.rewards)
     return state
