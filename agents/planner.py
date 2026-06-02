@@ -4,6 +4,7 @@ from config import prompts
 from config.logger_config import sars_logger as logger
 from config.model_config import BackboneModel
 from config.database_utils import save_agent_state
+from config.prompts import planner_policy
 from states.agent_state import SAGEAgentState
 
 
@@ -12,13 +13,12 @@ def planner(state: SAGEAgentState, model: BackboneModel,  lora_name: str) -> SAG
     user_content = f"For every question in the list. Please generate a concise plan for to solve the question."
     questions = "\n\n".join([f"question {i + 1}:\n{task_item.question}" for i, task_item in enumerate(state.tasks)])
     messages = [
-        SystemMessage(content=prompts.planner_policy),
+        SystemMessage(content=planner_policy),
         HumanMessage(content=user_content + questions)
     ]
     lora_model = model.with_config(configurable={"model": lora_name})
     try:
         response = lora_model.invoke(messages)
-        print(response.content)
         logger.info("[Planner]: Created the Plans for every question ")
     except Exception as e:
         logger.error(f"[Planner]: Error while creating the plans: {e}")
@@ -39,7 +39,7 @@ def planner(state: SAGEAgentState, model: BackboneModel,  lora_name: str) -> SAG
         plan = plans[i].get("plan")
         if question == state.tasks[i].question:
             state.tasks[i].plan = plan
-    state.status = "planned"
-    logger.info(f"[Planner]: Updated the state with the new status {state.status}")
+
+    logger.info(f"[Planner]: Updated the state with the generated plans")
     save_agent_state(state)
     return state

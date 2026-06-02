@@ -4,6 +4,7 @@ from config import prompts
 from config.logger_config import sars_logger as logger
 from config.model_config import BackboneModel
 from config.database_utils import save_agent_state
+from config.prompts import challenger_policy
 from states.agent_state import SAGEAgentState
 from states.rewards import RewardState
 from states.scores import ScoreState
@@ -14,7 +15,7 @@ def challenger(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> S
     logger.info("[Challenger]: Initiating the Challenger Agent")
     user_content = f"Dataset Reference Examples: \n {state.input} \n\nPlease generate a set of 5 new tasks following the reference style."
     messages = [
-        SystemMessage(content=prompts.challenger_policy),
+        SystemMessage(content=challenger_policy),
         HumanMessage(content=user_content)
     ]
     lora_model = model.with_config(configurable={"model": lora_name})
@@ -31,7 +32,7 @@ def challenger(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> S
             tasks.append(TasksState(
                 question=task_cleaned,
                 rewards=RewardState(),
-                score=ScoreState(score_quality="", score_planner="", score_ground_truth=""),
+                score=ScoreState(score_quality=0.0, score_planner=0.0, score_ground_truth=0.0),
                 plan="",
                 solution="")
             )
@@ -39,6 +40,5 @@ def challenger(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> S
     state.tasks = state.tasks + tasks
     #print("state.tasks: ", state.tasks)
     logger.info("[Challenger]: Updated the state with the new tasks")
-    state.status = "challenged"
     save_agent_state(state)
     return state

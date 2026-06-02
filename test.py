@@ -38,7 +38,6 @@ def test():
 
     query = ["Add all the 25 numbers from 1 to 25", "Pick a random number between 1 and 25 and multiply by itself."]
     # Training Loop comes here.
-
     messages = [HumanMessage(content=f"Generate 3 different mathematical tasks similar to the {query}")]
     initial_state = SAGEAgentState(
         messages=messages,
@@ -53,7 +52,6 @@ def test():
             print(task)
     else:
         print("\nNo tasks generated or found in the final graph state ")
-
     #response = train_model()
     print(response)
 

@@ -9,7 +9,8 @@ vllm serve ./base_model \
     challenger=./adapters/challenger_lora \
     planner=./adapters/planner_lora \
     solver=./adapters/solver_lora \
-    critic=./adapters/critic+lora
+    critic=./adapters/critic_lora \
+    reward=./adapters/reward_lora
 
 
 

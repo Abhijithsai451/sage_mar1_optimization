@@ -54,8 +54,7 @@ def init_database():
     id TEXT PRIMARY KEY, 
     messages TEXT NOT NULL, 
     input TEXT NOT NULL, 
-    parameter_state_id TEXT NOT NULL, 
-    status TEXT NOT NULL, 
+    parameter_state_id TEXT NOT NULL,  
     FOREIGN KEY (parameter_state_id) REFERENCES parameter_states(id))
     """)
 
@@ -82,9 +81,9 @@ def clear_db():
     cursor = conn.cursor()
     cursor.execute("PRAGMA foreign_keys = OFF;")
     tables = ['task_states', 'reward_states', 'score_states', 'parameter_states', 'sage_states']
-    for table in tables:
+    for table in reversed(tables):
         try:
-            cursor.execute(f"DELETE FROM {table}")
+            cursor.execute(f"DROP TABLE IF EXISTS {table}")
             logger.info(f"Cleared table: {table}")
         except sqlite3.OperationalError as e:
             logger.error(f"Error clearing table {table}: {e}")
@@ -152,9 +151,9 @@ def save_agent_state(state: SAGEAgentState):
 
     cursor.execute(
         '''INSERT OR REPLACE INTO sage_states 
-           (id, messages, input, parameter_state_id, status) 
-           VALUES (?, ?, ?, ?, ?)''',
-        (state.id, messages_json, input_json, state.parameter_state.id, state.status)
+           (id, messages, input, parameter_state_id) 
+           VALUES (?, ?, ?, ?)''',
+        (state.id, messages_json, input_json, state.parameter_state.id)
     )
     conn.commit()
     conn.close()
@@ -244,7 +243,6 @@ def load_agent_state(state_id: str) -> Optional[SAGEAgentState]:
             input=input_list,
             parameter_state=param_state,
             tasks=tasks,
-            status=status
         )
     return None
 
