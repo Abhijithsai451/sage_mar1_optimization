@@ -1,5 +1,6 @@
 
 source /Users/abhijithsai/.venv-vllm-metal/bin/activate
+export VLLM_ALLOW_RUNTIME_LORA_UPDATING=True
 vllm serve ./base_model \
   --port 8000 \
   --enable-lora \

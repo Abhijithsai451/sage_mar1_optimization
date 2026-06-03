@@ -1,13 +1,9 @@
 langgraph
 langchain
-langchain_ollama
-torch
-torchvision
 datasets
 wandb
 dotenv
 peft
-trl
 # VLLM settings
 #curl -fsSL https://raw.githubusercontent.com/vllm-project/vllm-metal/main/install.sh | bash
 #source ~/.venv-vllm-metal/bin/activate
