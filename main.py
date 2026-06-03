@@ -44,12 +44,6 @@ def main():
         tasks=[],
     )
     response = graph.invoke(initial_state)
-    if 'tasks' in response and response['tasks']:
-        print("\nGenerated Tasks from Challenger:")
-        for task in response['tasks']:
-            print(task.rewards)
-    else:
-        print("\nNo tasks generated or found in the final graph state ")
-
+    print(response)
 if __name__ == "__main__":
     main()
