@@ -21,7 +21,7 @@ def challenger(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> S
     lora_model = model.with_config(configurable={"model": lora_name})
     response = lora_model.invoke(messages)
     content = response.content
-    #print(content)
+    print(content)
     logger.info("[Challenger]: Challenger Agent created the Response ")
     content = re.findall(r"<task>(.*?)</task>", content, re.DOTALL)
     tasks = []
@@ -36,9 +36,8 @@ def challenger(state: SAGEAgentState, model: BackboneModel, lora_name: str) -> S
                 plan="",
                 solution="")
             )
-    #print("tasks: ", tasks)
     state.tasks = state.tasks + tasks
-    #print("state.tasks: ", state.tasks)
+    print("state.tasks: ", state.tasks)
     logger.info("[Challenger]: Updated the state with the new tasks")
     save_agent_state(state)
     return state
