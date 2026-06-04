@@ -1,5 +1,6 @@
 import random
 
+import numpy as np
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from config.losses_optimizers import compute_advantage, optimize_adapters
@@ -41,8 +42,6 @@ def sage_trainer(backbone, graph, train_data, batch_size= 4, optimization_epochs
 
         for sample in current_batch:
             question = sample["question"]  if isinstance(sample, dict) else sample.question
-            challenger_user_content = (f"Dataset Reference Examples: \n {question} \n\nPlease generate a set of 5 "
-                                       f"new tasks following the reference style.")
 
             initial_state = SAGEAgentState(
                             messages =[] ,

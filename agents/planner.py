@@ -25,6 +25,7 @@ def planner(state: SAGEAgentState, model: BackboneModel,  lora_name: str) -> SAG
     plan_blocks = re.findall(r"<task>(.*?)</task>", response.content, re.DOTALL)
     plans = []
     logger.info("[Planner]: Extracting the tasks from the response and creating the state objects")
+    print(plan_blocks)
     for plan_block in plan_blocks:
         question_tags = re.search(r"<question>(.*?)</question>", plan_block, re.DOTALL)
         question = question_tags.group(1).strip()

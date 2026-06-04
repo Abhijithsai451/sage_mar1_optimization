@@ -32,29 +32,64 @@ def optimize_adapters(backbone, lora_name, trajectories, epochs = 4):
     backbone.set_active_adapter(lora_name)
     model = backbone.model
     tokenizer = backbone.tokenizer
-    model.train()
 
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "right"
+
+    model.train()
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = Adam(trainable_params, lr=2e-6)
 
     logger.info(f" -> Running {epochs} optimization epochs directly on unified memory for {lora_name}")
 
+    full_sequences = [traj["prompt"]+ traj["generation"] for traj in trajectories]
+    prompts = [traj["prompt"] for traj in trajectories]
+    advantages = torch.tensor(
+        [traj["advantage"] for traj in trajectories],
+        dtype=torch.float16,
+        device = model.device
+    )
     for epoch in range(epochs):
-        random.shuffle(trajectories)
-        for traj in trajectories:
-            optimizer.zero_grad()
+        optimizer.zero_grad()
+        inputs = tokenizer(full_sequences, padding=True, return_tensors="pt").to(model.device)
 
-            full_sequence = traj["prompt"] + traj["generation"]
-            inputs = tokenizer(full_sequence, return_tensors="pt").to(model.device)
-            prompt_len = tokenizer(traj["prompt"], return_tensors="pt")["input_ids"].shape[1]
+        prompt_inputs = tokenizer(prompts, padding=False)
+        prompt_lens = [len(ids) for ids in prompt_inputs["input_ids"]]
 
-            logits = model(**inputs).logits
-            loss = compute_loss(logits, inputs["input_ids"], prompt_len, traj["advantage"])
+        outputs = model(**inputs)
+        logits = outputs.logits
+
+        shift_logits = logits[:, :-1, :]
+        shift_labels = inputs["input_ids"][:, 1:]
+        shift_mask = inputs["attention_mask"][:, 1:]
+
+        log_probs = F.log_softmax(shift_logits, dim=-1)
+        token_log_probs = torch.gather(log_probs, dim=-1, index=shift_labels.unsqueeze(-1)).squeeze(-1)
+
+        total_loss = 0.0
+        valid_count = 0
+
+        for i in range(len(trajectories)):
+            p_len = prompt_lens[i]
+            actual_end = shift_mask[i].sum().item()
+
+            if actual_end <= p_len - 1:
+                continue
+
+            gen_log_probs = token_log_probs[i, p_len - 1: actual_end]
+            if gen_log_probs.numel() == 0:
+                continue
+
+            traj_loss = -gen_log_probs.mean() * advantages[i]
+            total_loss += traj_loss
+            valid_count += 1
+
+        if valid_count > 0:
+            loss = total_loss / valid_count
             loss.backward()
             optimizer.step()
 
-    # Auto-serialize parameters right back to the designated local storage path
     save_path = f"./adapters/{lora_name}_lora"
     os.makedirs(save_path, exist_ok=True)
-    model.save_pretrained(save_path)
-    logger.info(f" -> Synchronized and saved {lora_name} updates to disk.")
+    model.save_pretrained(save_path, selected_adapters=[lora_name])
