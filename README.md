@@ -13,11 +13,8 @@ The core idea is to create a self-evolving system where LLMs learn from their ow
 
 By creating this multi-agent feedback loop, SAGE-RL aims to develop LLMs that are not only capable of solving challenging problems but also inherently understand how to learn and adapt to new complexities.
 
-# SAGE-RL: A Multi-Agent Self-Evolving Framework for Enhancing LLM Reasoning
 
-// ... previous section on project description ...
-
-## Project Structure: The `agents` Folder
+## Project Structure: The `agents` 
 
 The `agents` directory is the heart of the SAGE-RL framework, housing the individual LLM agents and the orchestration logic that binds them together. Each file typically defines an agent's role and how it interacts with the shared `SAGEAgentState`.
 
