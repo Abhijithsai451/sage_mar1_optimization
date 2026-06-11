@@ -118,7 +118,3 @@ This script uses the `sage_trainer` to perform on-policy policy gradient updates
 - `start.sh`: Launches `vllm serve` with specific LoRA modules for each agent role (`challenger`, `planner`, `solver`, `critic`, `reward`).
 - `main.py`: Demonstrates the LangGraph workflow and saves a visualization to `agent_workflow.png`.
 - `test.py`: Implementation of the RL training loop.
-
-
-## License
-[Add License Info Here - e.g., MIT]
